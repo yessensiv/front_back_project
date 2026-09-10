@@ -2,3 +2,4 @@
 # amyrkhan asylkhan
 # zhusupova dana
 # joilou bayansulu
+# esensary nurdaulet
