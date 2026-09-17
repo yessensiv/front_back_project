@@ -10,11 +10,15 @@ const programmers = [
   },
   {
     name: "Жусупова Дана",
-    role: "Backend Разработчик",
-    about: "",
-    skills: [],
-    experience: "",
-    contacts: "Telegram:  | Email: "
+    role: "UX/UI designer",
+    about: "UI/UX дизайнер с фокусом на создание чистых и функциональных интерфейсов",
+    skills: ["Figma",
+    "Adobe Photoshop",
+    "Adobe Illustrator",
+    "UI/UX Design",
+    "HTML/CSS"],
+    experience: "Учебные проекты по разработке веб-страниц и автоматизации задач с использованием скриптов.",
+    contacts: "Telegram: hazahahahahz | Email: zhusupovad055@gmail.com"
   },
   {
     name: "Әмірхан Асылхан",
