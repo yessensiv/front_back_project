@@ -21,7 +21,7 @@ h1 {
   margin-bottom: 30px;
 }
 
-/* Общий прямоугольный контейнер как на скетче */
+
 .team-container {
   display: flex;
   justify-content: center;
@@ -33,7 +33,7 @@ h1 {
   background-color: #ffffff;
 }
 
-/* Отдельная карточка программиста */
+
 .card {
   width: 220px;
   cursor: pointer;
@@ -46,7 +46,7 @@ h1 {
   border-color: #0066cc;
 }
 
-/* Квадратный блок фото (JPG со скетча) */
+
 .photo-box {
   width: 100%;
   aspect-ratio: 1 / 1;
@@ -63,7 +63,7 @@ h1 {
   display: block;
 }
 
-/* Прямоугольный блок с именем (name со скетча) */
+
 .name-box {
   border: 1px solid #333;
   padding: 10px;
@@ -72,9 +72,9 @@ h1 {
   background-color: #fafafa;
 }
 
-/* Простое модальное окно без каких-либо анимаций */
+
 .modal {
-  display: none; /* скрыто по умолчанию */
+  display: none; 
   position: fixed;
   top: 0;
   left: 0;
@@ -139,7 +139,7 @@ p {
   color: #444;
 }
 
-/* Адаптивность для мобильных экранов */
+
 @media (max-width: 768px) {
   .team-container {
     flex-direction: column;
