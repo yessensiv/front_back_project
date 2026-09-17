@@ -2,11 +2,11 @@
 const programmers = [
   {
     name: "Есенсары Нурдаулет",
-    role: "",
-    about: "",
-    skills: ["HTML5", "CSS3"],
-    experience: "",
-    contacts: "Telegram:  | Email: "
+    role: "Junior Backend Developer",
+    about: "Студент 3-го курса по специальности «Computer Engineering and Software». Увлекаюсь веб-разработкой и созданием пользовательских интерфейсов, активно изучаю современные технологии программирования.",
+    skills: ["HTML5", "CSS3", "JavaScript", "Python", "Linux", "Git"],
+    experience: "Учебные проекты по разработке веб-страниц и автоматизации задач с использованием скриптов.",
+    contacts: "Telegram: @prfctiv | Email: timushl404@gmail.com"
   },
   {
     name: "Жусупова Дана",
