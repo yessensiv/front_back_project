@@ -1,3 +1,4 @@
+// Данные 3-х программистов
 const programmers = [
   {
     name: "Есенсары Нұрдаулет",
@@ -61,12 +62,18 @@ function switchTab(target) {
     document.getElementById("resumeRole").textContent = dev.role;
     document.getElementById("resumeAbout").textContent = dev.about;
 
+    // Обновляем бейдж роли
+    const badge = document.getElementById("resumeBadge");
+    if (badge) badge.textContent = dev.role;
+
+    // Формируем чипы навыков
     const skillsList = document.getElementById("resumeSkills");
     skillsList.innerHTML = "";
     dev.skills.forEach(skill => {
-      const li = document.createElement("li");
-      li.textContent = skill;
-      skillsList.appendChild(li);
+      const chip = document.createElement("span");
+      chip.className = "skill-chip";
+      chip.textContent = skill;
+      skillsList.appendChild(chip);
     });
 
     document.getElementById("resumeExperience").textContent = dev.experience;
