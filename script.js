@@ -18,11 +18,11 @@ const programmers = [
   },
   {
     name: "Әмірхан Асылхан",
-    role: "",
-    about: "",
-    skills: [""],
-    experience: "",
-    contacts: "Telegram: | Email: "
+    role: "Frontend Разработчик",
+    about: "Студент 3-го курса, учусь в университете AIU.Увлекаюсь в фронтенд разработкой",
+    skills: ["HTML", "CSS", "Javascript", "React", "Python", "C++", "Typescript", "Java"],
+    experience: "3 года",
+    contacts: "Telegram: @as1kqlw | Email: asylhkanamyrhkan@gmail.com"
   }
 ];
 
