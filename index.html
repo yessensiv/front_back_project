@@ -1,57 +1,100 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
   <meta charset="UTF-8">
-  <title>Резюме</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Команда программистов | Резюме</title>
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
 
-  <h1>Команда программистов</h1>
-  <p class="subtitle">Нажмите на карточку любого участника, чтобы открыть его резюме</p>
+  <div class="app-container">
+    <nav class="tabs-nav" role="tablist">
+      <button class="tab-btn active" onclick="switchTab('main')" id="tab-btn-main" role="tab">Главная</button>
+      <button class="tab-btn" onclick="switchTab(0)" id="tab-btn-0" role="tab">1 человек</button>
+      <button class="tab-btn" onclick="switchTab(1)" id="tab-btn-1" role="tab">2 человек</button>
+      <button class="tab-btn" onclick="switchTab(2)" id="tab-btn-2" role="tab">3 человек</button>
+    </nav>
 
-  <div class="team-container">
-    <div class="card" onclick="openResume(0)">
-      <div class="photo-box">
-        <img src="/assets/Nurdaulet.jpeg" alt="Фото 1">
-      </div>
-      <div class="name-box">Есенсары Нұрдаулет</div>
-    </div>
-
-    <div class="card" onclick="openResume(1)">
-      <div class="photo-box">
-        <img src="/assets/Dana.jpeg" alt="Фото 2">
-      </div>
-      <div class="name-box">Жусупова Дана</div>
-    </div>
-
-    <div class="card" onclick="openResume(2)">
-      <div class="photo-box">
-        <img src="/assets/Asylkhan.jpeg" alt="Фото 3">
-      </div>
-      <div class="name-box">Әмірхан Асылхан</div>
-    </div>
-  </div>
- 
-  <div id="modal" class="modal">
-    <div class="modal-content">
-      <span class="close-btn" onclick="closeResume()">&times;</span>
-      <h2 id="resumeName"></h2>
-      <p id="resumeRole" class="role"></p>
+    <div class="content-box">
       
-      <h3>О себе</h3>
-      <p id="resumeAbout"></p>
+      <section id="view-main" class="tab-view active">
+        <h1 class="main-title">Comand</h1>
+        <p class="main-subtitle">Open the tab</p>
 
-      <h3>Навыки</h3>
-      <ul id="resumeSkills"></ul>
+        <div class="cards-grid">
+          <div class="member-card active-card" onclick="switchTab(0)">
+            <div class="avatar-box">
+              <img src="assets/Nurdaulet.jpeg" alt="Есенсары Нұрдаулет">
+            </div>
+            <div class="member-info">
+              <h2 class="member-name">Есенсары Нұрдаулет</h2>
+              <p class="member-role">Профессия: <span>Junior Backend Developer</span></p>
+              <span class="open-link">Открыть профиль &rarr;</span>
+            </div>
+          </div>
 
-      <h3>Опыт работы</h3>
-      <p id="resumeExperience"></p>
+          <div class="member-card" onclick="switchTab(1)">
+            <div class="avatar-box">
+              <img src="assets/Dana.jpeg" alt="Жусупова Дана">
+            </div>
+            <div class="member-info">
+              <h2 class="member-name">Жусупова Дана</h2>
+              <p class="member-role">Профессия: <span>UX/UI designer</span></p>
+              <span class="open-link">Открыть профиль &rarr;</span>
+            </div>
+          </div>
 
-      <h3>Контакты</h3>
-      <p id="resumeContacts"></p>
+          <div class="member-card" onclick="switchTab(2)">
+            <div class="avatar-box">
+              <img src="assets/Asylkhan.jpeg" alt="Әмірхан Асылхан">
+            </div>
+            <div class="member-info">
+              <h2 class="member-name">Әмірхан Асылхан</h2>
+              <p class="member-role">Профессия: <span>Frontend Разработчик</span></p>
+              <span class="open-link">Открыть профиль &rarr;</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-resume" class="tab-view">
+        <div class="resume-header">
+          <div class="resume-avatar">
+            <img id="resumePhoto" src="" alt="Фото участника">
+          </div>
+          <div class="resume-header-text">
+            <h2 id="resumeName"></h2>
+            <p id="resumeRole" class="resume-role-text"></p>
+          </div>
+        </div>
+
+        <div class="resume-section">
+          <h3>О себе</h3>
+          <p id="resumeAbout"></p>
+        </div>
+
+        <div class="resume-section">
+          <h3>Навыки</h3>
+          <ul id="resumeSkills"></ul>
+        </div>
+
+        <div class="resume-section">
+          <h3>Опыт работы</h3>
+          <p id="resumeExperience"></p>
+        </div>
+
+        <div class="resume-section">
+          <h3>Контакты</h3>
+          <p id="resumeContacts"></p>
+        </div>
+      </section>
     </div>
   </div>
+
   <script src="script.js"></script>
 </body>
+
 </html>
