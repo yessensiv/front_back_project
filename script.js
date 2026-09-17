@@ -35,26 +35,24 @@ const programmers = [
   }
 ];
 
-// Функция переключения вкладок
+
 function switchTab(target) {
-  // 1. Снимаем класс active со всех верхних кнопок-вкладок
+
   const tabButtons = document.querySelectorAll(".tab-btn");
   tabButtons.forEach(btn => btn.classList.remove("active"));
 
-  // 2. Скрываем все экраны
   const views = document.querySelectorAll(".tab-view");
   views.forEach(view => view.classList.remove("active"));
 
   if (target === "main") {
-    // Активируем кнопку «Главная» и показываем Main page
+
     document.getElementById("tab-btn-main").classList.add("active");
     document.getElementById("view-main").classList.add("active");
   } else if (typeof target === "number" && programmers[target]) {
-    // Активируем соответствующую вкладку (1, 2 или 3 человек)
+
     const btn = document.getElementById("tab-btn-" + target);
     if (btn) btn.classList.add("active");
 
-    // Заполняем данные резюме выбранного участника
     const dev = programmers[target];
     document.getElementById("resumePhoto").src = dev.photo;
     document.getElementById("resumePhoto").alt = dev.name;
@@ -62,11 +60,9 @@ function switchTab(target) {
     document.getElementById("resumeRole").textContent = dev.role;
     document.getElementById("resumeAbout").textContent = dev.about;
 
-    // Обновляем бейдж роли
     const badge = document.getElementById("resumeBadge");
     if (badge) badge.textContent = dev.role;
 
-    // Формируем чипы навыков
     const skillsList = document.getElementById("resumeSkills");
     skillsList.innerHTML = "";
     dev.skills.forEach(skill => {
@@ -79,7 +75,6 @@ function switchTab(target) {
     document.getElementById("resumeExperience").textContent = dev.experience;
     document.getElementById("resumeContacts").textContent = dev.contacts;
 
-    // Показываем экран резюме
     document.getElementById("view-resume").classList.add("active");
   }
 
