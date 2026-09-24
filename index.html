@@ -34,12 +34,14 @@
         <button class="tab-btn" onclick="switchTab(2)" id="tab-btn-2" role="tab">
           <span class="num-badge"></span> 3 человек
         </button>
-				<button class="tab-btn" onclick="switchTab(2)" id="tab-btn-3" role="tab">
+				<button class="tab-btn" onclick="switchTab(2)" id="tab-btn-4" role="tab">
           <span class="num-badge"></span> 1 тапсырма
         </button>
-				<button class="tab-btn" onclick="switchTab(2)" id="tab-btn-3" role="tab">
+				<button class="tab-btn" onclick="switchTab(2)" id="tab-btn-5" role="tab">
           <span class="num-badge"></span> 2 тапсырма
         </button>
+        <button class="tab-btn" onclick="switchTab('task3')" id="tab-btn-task3" role="tab"><span class="num-badge">3</span> Тапсырма</button>
+        <button class="tab-btn" onclick="switchTab('task4')" id="tab-btn-task4" role="tab"><span class="num-badge">4</span> Тапсырма</button>
       </nav>
     </header>
 
@@ -173,6 +175,19 @@
             <p id="resumeContacts" class="box-text contact-text"></p>
           </div>
         </div>
+      </section>
+      <section id="view-task3" class="tab-view task-view" aria-labelledby="task3-title">
+        <div class="task-heading"><span class="task-number">3-тапсырма</span><h2 id="task3-title">Динамикалық кесте</h2><p>Кесте өлшемін жазыңыз, содан кейін ұяшықтарды бояу үшін оларды басыңыз.</p></div>
+        <div class="table-controls">
+          <label for="rows-input">Жол саны<input type="number" id="rows-input" value="4" min="1" max="20" inputmode="numeric"></label>
+          <label for="cols-input">Баған саны<input type="number" id="cols-input" value="4" min="1" max="20" inputmode="numeric"></label>
+          <button class="action-button" id="build-table-btn" type="button">Кесте құру</button>
+        </div>
+        <p id="colored-counter" class="colored-counter" aria-live="polite">Боялған ұяшықтар саны: 0</p><div id="table-container" class="table-container"></div>
+      </section>
+      <section id="view-task4" class="tab-view task-view" aria-labelledby="task4-title">
+        <div class="task-heading"><span class="task-number">4-тапсырма</span><h2 id="task4-title">Тақырыпты ауыстыру</h2><p>Бүкіл сайт үшін ашық және қараңғы тақырыптарды ауыстырыңыз.</p></div>
+        <div class="theme-demo-card"><span class="theme-icon" aria-hidden="true">☀️</span><div><h3>Безендіру баптауы</h3><p id="theme-status">Қазір қараңғы тақырып қосулы.</p></div><button class="action-button" id="theme-toggle-btn" type="button">Ашық тақырыпты қосу</button></div>
       </section>
     </main>
   </div>

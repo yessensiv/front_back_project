@@ -76,7 +76,63 @@ function switchTab(target) {
     document.getElementById("resumeContacts").textContent = dev.contacts;
 
     document.getElementById("view-resume").classList.add("active");
+  } else if (target === "task3" || target === "task4") {
+    document.getElementById("tab-btn-" + target).classList.add("active");
+    document.getElementById("view-" + target).classList.add("active");
   }
 
   window.scrollTo(0, 0);
 }
+
+const zholEngizu = document.getElementById("rows-input");
+const baganEngizu = document.getElementById("cols-input");
+const kesteBatyrmasy = document.getElementById("build-table-btn");
+const kesteOrny = document.getElementById("table-container");
+const sanaqMati = document.getElementById("colored-counter");
+const temaBatyrmasy = document.getElementById("theme-toggle-btn");
+const temaMati = document.getElementById("theme-status");
+
+function boyaulySana() {
+  const boyaulyUyashyktar = document.querySelectorAll(".colored");
+  sanaqMati.textContent = "Боялған ұяшықтар саны: " + boyaulyUyashyktar.length;
+}
+
+function kesteKuru() {
+  const zholSany = zholEngizu.value;
+  const baganSany = baganEngizu.value;
+  kesteOrny.innerHTML = "";
+
+  const keste = document.createElement("table");
+  keste.className = "dynamic-table";
+
+  for (let zhol = 0; zhol < zholSany; zhol++) {
+    const kesteZholy = document.createElement("tr");
+    for (let bagan = 0; bagan < baganSany; bagan++) {
+      const uyashyk = document.createElement("td");
+      uyashyk.textContent = (zhol + 1) + ":" + (bagan + 1);
+      uyashyk.onclick = function () {
+        uyashyk.classList.toggle("colored");
+        boyaulySana();
+      };
+      kesteZholy.appendChild(uyashyk);
+    }
+    keste.appendChild(kesteZholy);
+  }
+  kesteOrny.appendChild(keste);
+  boyaulySana();
+}
+
+kesteBatyrmasy.onclick = kesteKuru;
+
+temaBatyrmasy.onclick = function () {
+  document.body.classList.toggle("light-theme");
+  if (document.body.classList.contains("light-theme")) {
+    temaMati.textContent = "Қазір ашық тақырып қосулы.";
+    temaBatyrmasy.textContent = "Қараңғы тақырыпты қосу";
+  } else {
+    temaMati.textContent = "Қазір қараңғы тақырып қосулы.";
+    temaBatyrmasy.textContent = "Ашық тақырыпты қосу";
+  }
+};
+
+kesteKuru();
