@@ -558,13 +558,14 @@ body.light-theme .tab-btn:hover {
 .dom-demo h3 { margin-bottom: 10px; font-size: 16px; }
 .demo-hint { color: var(--text-muted); font-size: 14px; }
 #greeting { font-size: 24px; font-weight: 700; }
-.changeable-paragraph { margin-top: 14px; padding: 14px; border: 1px dashed #829d87; border-radius: 10px; font-size: 18px; color: var(--text-main); cursor: pointer; }
+.changeable-paragraph { margin-top: 14px; padding: 14px; border: 1px dashed #829d87; border-radius: 10px; font-size: 18px; color: var(--text-main); }
 .changeable-paragraph.changed { color: #e879b0; font-size: 28px; }
 .changeable-paragraph:focus-visible { outline: 2px solid #829d87; outline-offset: 3px; }
 .class-example.active { background: #d8e9d6; border-color: #829d87; color: #304d37; }
 .class-list { margin: 20px 0 8px; overflow-wrap: anywhere; }
 .new-div { position: relative; max-width: 980px; margin: 16px auto 0; padding: 24px; border: 1px solid #829d87; border-radius: 16px; background: #d8e9d6; color: #304d37; }
 .new-div[hidden] { display: none; }
+.action-button:disabled { cursor: default; opacity: .65; transform: none; }
 body.light-theme .changeable-paragraph.changed { color: #a32761; }
 
 /* DOM тапсырмалары: қараңғы тақырыптағы айқын контраст */

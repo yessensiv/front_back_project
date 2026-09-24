@@ -81,7 +81,6 @@ function switchTab(target) {
     document.getElementById("view-" + target).classList.add("active");
   }
 
-  document.querySelector(".new-div").hidden = target !== "task1";
   window.scrollTo(0, 0);
 }
 
@@ -138,34 +137,36 @@ temaBatyrmasy.onclick = function () {
 
 kesteKuru();
 
-// 1-тапсырма: мәтінді өзгерту, элемент жасау және жою.
-document.getElementById("greeting").textContent = "Сәлем, әлем!";
-const newDiv = document.createElement("div");
-newDiv.className = "new-div";
-newDiv.textContent = "Мен жаңа элементпін";
-newDiv.lang = "kk";
-newDiv.hidden = true;
-document.body.appendChild(newDiv);
-document.querySelector(".old-element").remove();
+// 1-тапсырма: барлық өзгеріс тек батырманы басқанда орындалады.
+const greeting = document.getElementById("greeting");
+const greetingBatyrmasy = document.getElementById("change-greeting-btn");
+greetingBatyrmasy.onclick = function () {
+  greeting.textContent = "Сәлем, әлем!";
+};
 
-const changeableParagraph = document.createElement("p");
-changeableParagraph.textContent = "Бұл ауыспалы абзац";
-changeableParagraph.className = "changeable-paragraph";
-changeableParagraph.tabIndex = 0;
-changeableParagraph.setAttribute("role", "button");
-changeableParagraph.setAttribute("aria-pressed", "false");
+const changeableParagraph = document.getElementById("changeable-paragraph");
+const ozgertuBatyrmasy = document.getElementById("change-text-btn");
 function changeParagraphStyle() {
-  const changed = changeableParagraph.classList.toggle("changed");
-  changeableParagraph.setAttribute("aria-pressed", String(changed));
+  changeableParagraph.classList.toggle("changed");
 }
-changeableParagraph.addEventListener("click", changeParagraphStyle);
-changeableParagraph.addEventListener("keydown", event => {
-  if (event.key === "Enter" || event.key === " ") {
-    event.preventDefault();
-    changeParagraphStyle();
-  }
-});
-document.getElementById("paragraph-demo").appendChild(changeableParagraph);
+ozgertuBatyrmasy.onclick = changeParagraphStyle;
+
+const divKosuBatyrmasy = document.getElementById("add-div-btn");
+divKosuBatyrmasy.onclick = function () {
+  const janaDiv = document.createElement("div");
+  janaDiv.className = "new-div";
+  janaDiv.textContent = "Мен жаңа элементпін";
+  document.getElementById("new-div-place").appendChild(janaDiv);
+  divKosuBatyrmasy.disabled = true;
+  divKosuBatyrmasy.textContent = "Жаңа div қосылды";
+};
+
+const zhouBatyrmasy = document.getElementById("delete-old-btn");
+zhouBatyrmasy.onclick = function () {
+  document.querySelector(".old-element").remove();
+  zhouBatyrmasy.disabled = true;
+  zhouBatyrmasy.textContent = "Элемент жойылды";
+};
 
 // 2-тапсырма: класты ауыстыру және барлық кластарды шығару.
 const classDemo = document.getElementById("class-demo");
