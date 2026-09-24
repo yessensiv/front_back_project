@@ -34,11 +34,14 @@
         <button class="tab-btn" onclick="switchTab(2)" id="tab-btn-2" role="tab">
           <span class="num-badge"></span> 3 человек
         </button>
-				<button class="tab-btn" onclick="switchTab(2)" id="tab-btn-4" role="tab">
-          <span class="num-badge"></span> 1 тапсырма
+      </nav>
+      <nav class="tabs-nav practice-nav" aria-label="Практика DOM">
+        <span class="practice-label">ПРАКТИКА DOM</span>
+				<button class="tab-btn" onclick="switchTab('task1')" id="tab-btn-task1" type="button">
+          Тапсырма 1
         </button>
-				<button class="tab-btn" onclick="switchTab(2)" id="tab-btn-5" role="tab">
-          <span class="num-badge"></span> 2 тапсырма
+				<button class="tab-btn" onclick="switchTab('task2')" id="tab-btn-task2" type="button">
+          Тапсырма 2
         </button>
         <button class="tab-btn" onclick="switchTab('task3')" id="tab-btn-task3" role="tab"><span class="num-badge">3</span> Тапсырма</button>
         <button class="tab-btn" onclick="switchTab('task4')" id="tab-btn-task4" role="tab"><span class="num-badge">4</span> Тапсырма</button>
@@ -175,6 +178,20 @@
             <p id="resumeContacts" class="box-text contact-text"></p>
           </div>
         </div>
+      </section>
+      <section id="view-task1" class="tab-view task-view" lang="kk" aria-labelledby="task1-title">
+        <div class="task-heading"><span class="task-number">1-тапсырма</span><h2 id="task1-title">DOM элементтерімен жұмыс</h2><p>Мәтінді өзгерту, элемент қосу және жою.</p></div>
+        <div class="dom-demo"><h3>ID бойынша өзгертілген мәтін</h3><p id="greeting">Бастапқы мәтін</p></div>
+        <div class="dom-demo" id="paragraph-demo"><h3>Абзацты басыңыз</h3><p class="demo-hint">Мәтіннің түсі мен қаріп өлшемі өзгереді.</p></div>
+        <div class="old-element">Бұл ескі элемент жойылады.</div>
+        <p class="demo-hint">old-element элементі жойылды. Жаңа div төменде көрсетілген.</p>
+      </section>
+      <section id="view-task2" class="tab-view task-view" lang="kk" aria-labelledby="task2-title">
+        <div class="task-heading"><span class="task-number">2-тапсырма</span><h2 id="task2-title">Элемент кластарын басқару</h2><p>Батырманы басып, active класын қосыңыз немесе жойыңыз.</p></div>
+        <div id="class-demo" class="dom-demo class-example">Класы өзгеретін элемент</div>
+        <button id="toggle-class-btn" class="action-button" type="button" aria-pressed="false">active класын қосу</button>
+        <p id="class-list" class="class-list" aria-live="polite"></p>
+        <p class="demo-hint">Кластар тізімі браузер консолінде де көрсетіледі.</p>
       </section>
       <section id="view-task3" class="tab-view task-view" aria-labelledby="task3-title">
         <div class="task-heading"><span class="task-number">3-тапсырма</span><h2 id="task3-title">Динамикалық кесте</h2><p>Кесте өлшемін жазыңыз, содан кейін ұяшықтарды бояу үшін оларды басыңыз.</p></div>

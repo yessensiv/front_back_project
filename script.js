@@ -76,11 +76,12 @@ function switchTab(target) {
     document.getElementById("resumeContacts").textContent = dev.contacts;
 
     document.getElementById("view-resume").classList.add("active");
-  } else if (target === "task3" || target === "task4") {
+  } else if (["task1", "task2", "task3", "task4"].includes(target)) {
     document.getElementById("tab-btn-" + target).classList.add("active");
     document.getElementById("view-" + target).classList.add("active");
   }
 
+  document.querySelector(".new-div").hidden = target !== "task1";
   window.scrollTo(0, 0);
 }
 
@@ -136,3 +137,48 @@ temaBatyrmasy.onclick = function () {
 };
 
 kesteKuru();
+
+// 1-тапсырма: мәтінді өзгерту, элемент жасау және жою.
+document.getElementById("greeting").textContent = "Сәлем, әлем!";
+const newDiv = document.createElement("div");
+newDiv.className = "new-div";
+newDiv.textContent = "Мен жаңа элементпін";
+newDiv.lang = "kk";
+newDiv.hidden = true;
+document.body.appendChild(newDiv);
+document.querySelector(".old-element").remove();
+
+const changeableParagraph = document.createElement("p");
+changeableParagraph.textContent = "Бұл ауыспалы абзац";
+changeableParagraph.className = "changeable-paragraph";
+changeableParagraph.tabIndex = 0;
+changeableParagraph.setAttribute("role", "button");
+changeableParagraph.setAttribute("aria-pressed", "false");
+function changeParagraphStyle() {
+  const changed = changeableParagraph.classList.toggle("changed");
+  changeableParagraph.setAttribute("aria-pressed", String(changed));
+}
+changeableParagraph.addEventListener("click", changeParagraphStyle);
+changeableParagraph.addEventListener("keydown", event => {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    changeParagraphStyle();
+  }
+});
+document.getElementById("paragraph-demo").appendChild(changeableParagraph);
+
+// 2-тапсырма: класты ауыстыру және барлық кластарды шығару.
+const classDemo = document.getElementById("class-demo");
+const toggleClassButton = document.getElementById("toggle-class-btn");
+function showClasses() {
+  const classes = Array.from(classDemo.classList).join(", ");
+  document.getElementById("class-list").textContent = "Кластар тізімі: " + classes;
+  console.log("Кластар тізімі:", classes);
+}
+toggleClassButton.addEventListener("click", () => {
+  const active = classDemo.classList.toggle("active");
+  toggleClassButton.textContent = active ? "active класын жою" : "active класын қосу";
+  toggleClassButton.setAttribute("aria-pressed", String(active));
+  showClasses();
+});
+showClasses();
