@@ -55,6 +55,21 @@ body.light-theme {
 body.light-theme .member-card, body.light-theme .resume-card-box, body.light-theme .table-controls, body.light-theme .theme-demo-card { background: rgba(255, 255, 255, 0.72); }
 body.light-theme .table-controls input { background: #fff; }
 
+/* Қараңғы тақырыпта мәтін әрқашан анық көрінуі үшін */
+body:not(.light-theme) .content-box,
+body:not(.light-theme) .task-heading h2,
+body:not(.light-theme) .theme-demo-card h3,
+body:not(.light-theme) .table-controls label,
+body:not(.light-theme) .dynamic-table td {
+  color: #f8fafc;
+}
+
+body:not(.light-theme) .task-heading p,
+body:not(.light-theme) .theme-demo-card p,
+body:not(.light-theme) .table-controls label {
+  color: #cbd5e1;
+}
+
 
 .glow-orb {
   position: fixed;
@@ -115,6 +130,22 @@ body.light-theme .table-controls input { background: #fff; }
   align-items: center;
   gap: 8px;
   transition: var(--transition);
+}
+
+/* Названия вкладок должны быть видны в обеих темах */
+body:not(.light-theme) .tab-btn {
+  color: #e2e8f0;
+}
+
+body.light-theme .tab-btn {
+  background: rgba(255, 255, 255, 0.85);
+  color: #1e293b;
+  border-color: rgba(15, 23, 42, 0.16);
+}
+
+body.light-theme .tab-btn:hover {
+  background: #ffffff;
+  color: #0f172a;
 }
 
 .tab-btn:hover {
