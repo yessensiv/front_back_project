@@ -156,7 +156,7 @@ divKosuBatyrmasy.onclick = function () {
   const janaDiv = document.createElement("div");
   janaDiv.className = "new-div";
   janaDiv.textContent = "Мен жаңа элементпін";
-  document.getElementById("new-div-place").appendChild(janaDiv);
+  document.body.appendChild(janaDiv);
   divKosuBatyrmasy.disabled = true;
   divKosuBatyrmasy.textContent = "Жаңа div қосылды";
 };
