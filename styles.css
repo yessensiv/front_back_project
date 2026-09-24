@@ -566,6 +566,35 @@ body.light-theme .tab-btn:hover {
 .new-div { position: relative; max-width: 980px; margin: 16px auto 0; padding: 24px; border: 1px solid #829d87; border-radius: 16px; background: #d8e9d6; color: #304d37; }
 .new-div[hidden] { display: none; }
 body.light-theme .changeable-paragraph.changed { color: #a32761; }
+
+/* DOM тапсырмалары: қараңғы тақырыптағы айқын контраст */
+body:not(.light-theme) .practice-nav {
+  background: #1b2d25;
+  border: 1px solid #3b5f4a;
+}
+
+body:not(.light-theme) .practice-label { color: #bbf7d0; }
+
+body:not(.light-theme) .practice-nav .tab-btn {
+  background: #263b30;
+  border-color: #527461;
+  color: #f8fafc;
+}
+
+body:not(.light-theme) .practice-nav .tab-btn:hover { background: #345c3d; color: #ffffff; }
+body:not(.light-theme) .practice-nav .tab-btn.active { background: #4f8a5b; border-color: #6bb77b; color: #ffffff; }
+
+body:not(.light-theme) .dom-demo,
+body:not(.light-theme) .new-div {
+  background: #17231c;
+  border-color: #527461;
+  color: #f8fafc;
+}
+
+body:not(.light-theme) .class-example.active { background: #234b32; border-color: #6bb77b; color: #f8fafc; }
+body:not(.light-theme) .demo-hint,
+body:not(.light-theme) .class-list { color: #cbd5e1; }
+
 .task-view { max-width: 760px; }
 .task-heading { margin-bottom: 26px; }
 .task-number { display: inline-block; margin-bottom: 8px; color: #a5b4fc; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
