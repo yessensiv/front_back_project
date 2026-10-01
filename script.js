@@ -84,59 +84,6 @@ function switchTab(target) {
   window.scrollTo(0, 0);
 }
 
-const zholEngizu = document.getElementById("rows-input");
-const baganEngizu = document.getElementById("cols-input");
-const kesteBatyrmasy = document.getElementById("build-table-btn");
-const kesteOrny = document.getElementById("table-container");
-const sanaqMati = document.getElementById("colored-counter");
-const temaBatyrmasy = document.getElementById("theme-toggle-btn");
-const temaMati = document.getElementById("theme-status");
-
-function boyaulySana() {
-  const boyaulyUyashyktar = document.querySelectorAll(".colored");
-  sanaqMati.textContent = "Боялған ұяшықтар саны: " + boyaulyUyashyktar.length;
-}
-
-function kesteKuru() {
-  const zholSany = zholEngizu.value;
-  const baganSany = baganEngizu.value;
-  kesteOrny.innerHTML = "";
-
-  const keste = document.createElement("table");
-  keste.className = "dynamic-table";
-
-  for (let zhol = 0; zhol < zholSany; zhol++) {
-    const kesteZholy = document.createElement("tr");
-    for (let bagan = 0; bagan < baganSany; bagan++) {
-      const uyashyk = document.createElement("td");
-      uyashyk.textContent = (zhol + 1) + ":" + (bagan + 1);
-      uyashyk.onclick = function () {
-        uyashyk.classList.toggle("colored");
-        boyaulySana();
-      };
-      kesteZholy.appendChild(uyashyk);
-    }
-    keste.appendChild(kesteZholy);
-  }
-  kesteOrny.appendChild(keste);
-  boyaulySana();
-}
-
-kesteBatyrmasy.onclick = kesteKuru;
-
-temaBatyrmasy.onclick = function () {
-  document.body.classList.toggle("light-theme");
-  if (document.body.classList.contains("light-theme")) {
-    temaMati.textContent = "Қазір ашық тақырып қосулы.";
-    temaBatyrmasy.textContent = "Қараңғы тақырыпты қосу";
-  } else {
-    temaMati.textContent = "Қазір қараңғы тақырып қосулы.";
-    temaBatyrmasy.textContent = "Ашық тақырыпты қосу";
-  }
-};
-
-kesteKuru();
-
 // 1-тапсырма: барлық өзгеріс тек батырманы басқанда орындалады.
 const greeting = document.getElementById("greeting");
 const greetingBatyrmasy = document.getElementById("change-greeting-btn");
@@ -183,3 +130,60 @@ toggleClassButton.addEventListener("click", () => {
   showClasses();
 });
 showClasses();
+
+// 3-тапсырма: пайдаланушы енгізген жолдар мен бағандар санымен кесте құру.
+const zholEngizu = document.getElementById("rows-input");
+const baganEngizu = document.getElementById("cols-input");
+const kesteBatyrmasy = document.getElementById("build-table-btn");
+const kesteOrny = document.getElementById("table-container");
+const sanaqMati = document.getElementById("colored-counter");
+
+// Боялған ұяшықтарды санап, есептегіштің мәтінін жаңартады.
+function boyaulySana() {
+  const boyaulyUyashyktar = document.querySelectorAll(".colored");
+  sanaqMati.textContent = "Боялған ұяшықтар саны: " + boyaulyUyashyktar.length;
+}
+
+// Кестені жасайды және әр ұяшыққа түсті ауыстыру әрекетін қосады.
+function kesteKuru() {
+  const zholSany = zholEngizu.value;
+  const baganSany = baganEngizu.value;
+  kesteOrny.innerHTML = "";
+
+  const keste = document.createElement("table");
+  keste.className = "dynamic-table";
+
+  for (let zhol = 0; zhol < zholSany; zhol++) {
+    const kesteZholy = document.createElement("tr");
+    for (let bagan = 0; bagan < baganSany; bagan++) {
+      const uyashyk = document.createElement("td");
+      uyashyk.textContent = (zhol + 1) + ":" + (bagan + 1);
+      uyashyk.onclick = function () {
+        uyashyk.classList.toggle("colored");
+        boyaulySana();
+      };
+      kesteZholy.appendChild(uyashyk);
+    }
+    keste.appendChild(kesteZholy);
+  }
+  kesteOrny.appendChild(keste);
+  boyaulySana();
+}
+
+kesteBatyrmasy.onclick = kesteKuru;
+kesteKuru();
+
+// 4-тапсырма: батырманы басқанда ашық және қараңғы тақырыптарды ауыстыру.
+const temaBatyrmasy = document.getElementById("theme-toggle-btn");
+const temaMati = document.getElementById("theme-status");
+
+temaBatyrmasy.onclick = function () {
+  document.body.classList.toggle("light-theme");
+  if (document.body.classList.contains("light-theme")) {
+    temaMati.textContent = "Қазір ашық тақырып қосулы.";
+    temaBatyrmasy.textContent = "Қараңғы тақырыпты қосу";
+  } else {
+    temaMati.textContent = "Қазір қараңғы тақырып қосулы.";
+    temaBatyrmasy.textContent = "Ашық тақырыпты қосу";
+  }
+};
