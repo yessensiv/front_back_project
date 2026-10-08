@@ -6,6 +6,8 @@ const todoAddButton = document.getElementById("todo-add-btn");
 const todoList = document.getElementById("todo-list");
 const todoStatus = document.getElementById("todo-status");
 const todoTemplate = document.getElementById("todo-item-template");
+const todoFilters = document.getElementById("todo-filters");
+let activeFilter = "all";
 let todos = [];
 let editingTodoKey = null;
 const busyTodoKeys = new Set();
@@ -45,16 +47,23 @@ function todoKey(todo) {
 }
 
 function renderTodos() {
-  if (todos.length === 0) {
+  const visibleTodos = todos.filter(todo => {
+    if (activeFilter === "active") return !todo.completed;
+    if (activeFilter === "completed") return Boolean(todo.completed);
+    return true;
+  });
+  if (visibleTodos.length === 0) {
     const empty = document.createElement("li");
     empty.className = "todo-empty";
-    empty.textContent = "Задач пока нет.";
+    empty.textContent = activeFilter === "active"
+      ? "Незаконченных задач нет."
+      : activeFilter === "completed" ? "Законченных задач нет." : "Задач пока нет.";
     todoList.replaceChildren(empty);
     return;
   }
 
   const fragment = document.createDocumentFragment();
-  for (const todo of todos) {
+  for (const todo of visibleTodos) {
     const key = todoKey(todo);
     const item = todoTemplate.content.firstElementChild.cloneNode(true);
     const field = selector => item.querySelector(selector);
@@ -85,6 +94,17 @@ function todoFromEvent(event) {
   const row = event.target.closest(".todo-item");
   return todos.find(todo => todoKey(todo) === row?.dataset.key);
 }
+
+todoFilters.addEventListener("click", event => {
+  const button = event.target.closest("button[data-filter]");
+  if (!button || button.dataset.filter === activeFilter) return;
+  activeFilter = button.dataset.filter;
+  editingTodoKey = null;
+  todoFilters.querySelectorAll("button[data-filter]").forEach(filter => {
+    filter.setAttribute("aria-pressed", String(filter.dataset.filter === activeFilter));
+  });
+  renderTodos();
+});
 
 todoList.addEventListener("change", event => {
   if (event.target.matches(".todo-checkbox")) {

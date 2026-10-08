@@ -103,6 +103,23 @@ button:disabled { cursor: wait; opacity: .55; }
 .todo-status { margin: 22px 0 12px; }
 .todo-status.error { color: var(--danger); }
 
+.todo-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.todo-filters button {
+  padding: 8px 12px;
+  border: 1px solid var(--control-border);
+  border-radius: 8px;
+  background: var(--input);
+  color: var(--text);
+  font-size: 14px;
+}
+.todo-filters button:hover { border-color: var(--focus); }
+.todo-filters button[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--surface);
+  font-weight: 700;
+}
+
 .todo-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
 .todo-item {
   display: flex;

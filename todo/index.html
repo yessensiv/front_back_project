@@ -28,6 +28,11 @@
 
     <p class="hint">DummyJSON имитирует изменения. После подтверждения они сохраняются в этом браузере.</p>
     <p id="todo-status" class="todo-status" role="status" aria-live="polite">Загрузка задач…</p>
+    <div id="todo-filters" class="todo-filters" role="group" aria-label="Фильтр задач">
+      <button type="button" data-filter="all" aria-pressed="true" aria-controls="todo-list">Все</button>
+      <button type="button" data-filter="active" aria-pressed="false" aria-controls="todo-list">Незаконченные</button>
+      <button type="button" data-filter="completed" aria-pressed="false" aria-controls="todo-list">Законченные</button>
+    </div>
     <ul id="todo-list" class="todo-list" aria-label="Задачи"></ul>
 
     <template id="todo-item-template">
