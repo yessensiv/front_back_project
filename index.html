@@ -196,10 +196,11 @@
       <section id="view-task3" class="tab-view task-view" aria-labelledby="task3-title">
         <div class="task-heading"><span class="task-number">3-тапсырма</span><h2 id="task3-title">Динамикалық кесте</h2><p>Кесте өлшемін жазыңыз, содан кейін ұяшықтарды бояу үшін оларды басыңыз.</p></div>
         <div class="table-controls">
-          <label for="rows-input">Жол саны<input type="number" id="rows-input" value="4" min="1" max="20" inputmode="numeric"></label>
-          <label for="cols-input">Баған саны<input type="number" id="cols-input" value="4" min="1" max="20" inputmode="numeric"></label>
+          <label for="rows-input">Жол саны<input type="number" id="rows-input" value="4" min="1" max="20" step="1" inputmode="numeric" aria-describedby="table-error"></label>
+          <label for="cols-input">Баған саны<input type="number" id="cols-input" value="4" min="1" max="20" step="1" inputmode="numeric" aria-describedby="table-error"></label>
           <button class="action-button" id="build-table-btn" type="button">Кесте құру</button>
         </div>
+        <p id="table-error" class="table-error" role="alert" aria-live="assertive"></p>
         <p id="colored-counter" class="colored-counter" aria-live="polite">Боялған ұяшықтар саны: 0</p><div id="table-container" class="table-container"></div>
       </section>
       <section id="view-task4" class="tab-view task-view" aria-labelledby="task4-title">

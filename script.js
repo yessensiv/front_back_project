@@ -137,6 +137,7 @@ const baganEngizu = document.getElementById("cols-input");
 const kesteBatyrmasy = document.getElementById("build-table-btn");
 const kesteOrny = document.getElementById("table-container");
 const sanaqMati = document.getElementById("colored-counter");
+const kesteKatesi = document.getElementById("table-error");
 
 // Боялған ұяшықтарды санап, есептегіштің мәтінін жаңартады.
 function boyaulySana() {
@@ -146,8 +147,29 @@ function boyaulySana() {
 
 // Кестені жасайды және әр ұяшыққа түсті ауыстыру әрекетін қосады.
 function kesteKuru() {
-  const zholSany = zholEngizu.value;
-  const baganSany = baganEngizu.value;
+  const zholSany = Number(zholEngizu.value);
+  const baganSany = Number(baganEngizu.value);
+
+  kesteKatesi.textContent = "";
+  zholEngizu.removeAttribute("aria-invalid");
+  baganEngizu.removeAttribute("aria-invalid");
+
+  const zholBos = zholEngizu.value.trim() === "";
+  const baganBos = baganEngizu.value.trim() === "";
+  if (zholBos || baganBos) {
+    kesteKatesi.textContent = "Кесте өлшемін енгізіңіз.";
+  } else if (!Number.isInteger(zholSany) || !Number.isInteger(baganSany) || zholSany < 1 || baganSany < 1) {
+    kesteKatesi.textContent = "Жол мен баған саны 0-ден үлкен болуы керек.";
+  } else if (zholSany > 20 || baganSany > 20) {
+    kesteKatesi.textContent = "Жол мен баған саны 20-дан аспауы керек.";
+  }
+
+  if (kesteKatesi.textContent) {
+    if (zholBos || !Number.isInteger(zholSany) || zholSany < 1 || zholSany > 20) zholEngizu.setAttribute("aria-invalid", "true");
+    if (baganBos || !Number.isInteger(baganSany) || baganSany < 1 || baganSany > 20) baganEngizu.setAttribute("aria-invalid", "true");
+    return;
+  }
+
   kesteOrny.innerHTML = "";
 
   const keste = document.createElement("table");
