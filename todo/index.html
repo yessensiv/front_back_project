@@ -4,12 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Список задач · To-Do</title>
+  <script src="theme.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <main class="app">
     <header class="heading">
-      <span class="eyebrow">CRUD · DummyJSON</span>
+      <div class="heading-toolbar">
+        <span class="eyebrow">CRUD · DummyJSON</span>
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Тёмная тема" aria-pressed="true">Тёмная тема</button>
+      </div>
       <h1>Список задач</h1>
       <p>Добавляйте задачи, отмечайте выполненные, меняйте текст и удаляйте ненужные.</p>
     </header>
