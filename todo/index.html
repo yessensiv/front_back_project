@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Список задач · To-Do</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <header class="heading">
+      <span class="eyebrow">CRUD · DummyJSON</span>
+      <h1>Список задач</h1>
+      <p>Добавляйте задачи, отмечайте выполненные, меняйте текст и удаляйте ненужные.</p>
+    </header>
+
+    <form id="todo-form" class="todo-form">
+      <label for="todo-input">Новая задача</label>
+      <div class="todo-form-row">
+        <input id="todo-input" name="todo" type="text" maxlength="200" required placeholder="Что нужно сделать?" autocomplete="off">
+        <button id="todo-add-btn" class="action-button" type="submit">Добавить</button>
+      </div>
+    </form>
+
+    <p class="hint">DummyJSON имитирует изменения. После подтверждения они сохраняются в этом браузере.</p>
+    <p id="todo-status" class="todo-status" role="status" aria-live="polite">Загрузка задач…</p>
+    <ul id="todo-list" class="todo-list" aria-label="Задачи"></ul>
+
+    <template id="todo-item-template">
+      <li class="todo-item">
+        <input class="todo-checkbox" type="checkbox">
+        <div class="todo-content">
+          <span class="todo-text"></span>
+          <input class="todo-edit-input" type="text" maxlength="200" aria-label="Изменить текст задачи" hidden>
+          <small class="todo-local-note" hidden>Создано в этом браузере</small>
+        </div>
+        <div class="todo-actions">
+          <button class="todo-secondary-button" type="button" data-action="edit">Изменить</button>
+          <button class="todo-secondary-button" type="button" data-action="cancel" hidden>Отмена</button>
+          <button class="todo-delete-button" type="button" data-action="delete">Удалить</button>
+        </div>
+      </li>
+    </template>
+
+    <details class="reference">
+      <summary>Справочник по HTML и JavaScript</summary>
+      <p>Запуск: откройте этот файл <code>index.html</code> в браузере. Python, бэкенд и установка пакетов не нужны; для DummyJSON нужен интернет.</p>
+      <h2>HTML-теги</h2>
+      <ul>
+        <li><code>&lt;form&gt;</code> и <code>&lt;input type="text"&gt;</code> — ввод и отправка новой задачи.</li>
+        <li><code>&lt;label&gt;</code> — подпись поля; атрибут <code>for</code> связывает её с <code>id</code> поля.</li>
+        <li><code>&lt;button type="submit"&gt;</code> — добавление; <code>type="button"</code> — изменение, отмена и удаление.</li>
+        <li><code>&lt;ul&gt;</code> и <code>&lt;li&gt;</code> — список и отдельная задача.</li>
+        <li><code>&lt;input type="checkbox"&gt;</code> — отметка «Сделано».</li>
+        <li><code>&lt;template&gt;</code> — невидимый образец строки, который копирует JavaScript.</li>
+        <li><code>&lt;p role="status"&gt;</code> — сообщение о загрузке, результате или ошибке.</li>
+      </ul>
+      <h2>JavaScript</h2>
+      <ul>
+        <li><code>fetch()</code> отправляет GET, POST, PATCH и DELETE; <code>async/await</code> ждёт ответ.</li>
+        <li><code>response.ok</code> проверяет HTTP-ответ; <code>try/catch/finally</code> обрабатывает ошибку и возвращает кнопки в рабочее состояние.</li>
+        <li><code>addEventListener()</code> обрабатывает отправку формы, клики, галочку и клавиши Enter/Escape.</li>
+        <li><code>cloneNode(true)</code> копирует шаблон; <code>replaceChildren()</code> обновляет список.</li>
+        <li><code>textContent</code> безопасно выводит текст задачи как текст, без выполнения HTML.</li>
+        <li><code>dataset</code> и <code>closest()</code> помогают определить действие и нужную строку.</li>
+        <li><code>localStorage</code> и <code>JSON.stringify()/parse()</code> сохраняют изменения между открытиями страницы.</li>
+      </ul>
+      <p>DummyJSON не сохраняет POST, PATCH и DELETE на сервере. Задачи, созданные здесь, затем изменяются и удаляются локально; для исходных задач PATCH и DELETE отправляются в API.</p>
+    </details>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
