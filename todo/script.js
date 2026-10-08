@@ -1,5 +1,4 @@
 // CRUD задач. DummyJSON подтверждает изменения, но не хранит их на сервере.
-const TODO_API = "https://dummyjson.com/todos";
 const TODO_STORAGE_KEY = "front_back_project.todos.v1";
 const todoForm = document.getElementById("todo-form");
 const todoInput = document.getElementById("todo-input");
@@ -39,12 +38,6 @@ function saveTodoChanges() {
 function setTodoStatus(message, isError = false) {
   todoStatus.textContent = message;
   todoStatus.classList.toggle("error", isError);
-}
-
-async function requestTodo(url, options) {
-  const response = await fetch(url, options);
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  return response.json();
 }
 
 function todoKey(todo) {
@@ -126,12 +119,11 @@ todoList.addEventListener("keydown", event => {
 async function fetchTodos() {
   setTodoStatus("Загрузка задач…");
   try {
-    const data = await requestTodo(`${TODO_API}?limit=0`);
-    if (!Array.isArray(data.todos)) throw new Error("Неверный формат ответа API");
+    const serverTodos = await todoApi.getAll();
     const deleted = new Set(todoChanges.deleted);
     todos = [
       ...todoChanges.created,
-      ...data.todos.filter(todo => !deleted.has(todo.id)).map(todo => ({
+      ...serverTodos.filter(todo => !deleted.has(todo.id)).map(todo => ({
         ...todo,
         ...todoChanges.updated[todo.id]
       }))
@@ -156,12 +148,7 @@ todoForm.addEventListener("submit", async event => {
   todoAddButton.disabled = true;
   setTodoStatus("Добавление задачи…");
   try {
-    const created = await requestTodo(`${TODO_API}/add`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ todo: text, completed: false, userId: 5 })
-    });
-    if (created.id == null) throw new Error("API не подтвердил создание");
+    const created = await todoApi.create(text);
     const todo = { ...created, todo: text, completed: false, localKey: `local-${Date.now()}-${Math.random()}` };
     todoChanges.created.unshift(todo);
     todos.unshift(todo);
@@ -187,11 +174,7 @@ async function updateTodo(todo, changes) {
   renderTodos();
   try {
     if (!todo.localKey) {
-      await requestTodo(`${TODO_API}/${todo.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(changes)
-      });
+      await todoApi.update(todo.id, changes);
       todoChanges.updated[todo.id] = { ...todoChanges.updated[todo.id], ...changes };
     }
     Object.assign(todo, changes);
@@ -219,7 +202,7 @@ async function deleteTodo(todo) {
     if (todo.localKey) {
       todoChanges.created = todoChanges.created.filter(item => item.localKey !== key);
     } else {
-      await requestTodo(`${TODO_API}/${todo.id}`, { method: "DELETE" });
+      await todoApi.remove(todo.id);
       todoChanges.deleted.push(todo.id);
       delete todoChanges.updated[todo.id];
     }

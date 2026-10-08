@@ -60,6 +60,7 @@
         <li><code>&lt;p role="status"&gt;</code> — сообщение о загрузке, результате или ошибке.</li>
       </ul>
       <h2>JavaScript</h2>
+      <p><code>API.js</code> отправляет запросы к DummyJSON; <code>script.js</code> управляет интерфейсом и локальным сохранением изменений.</p>
       <ul>
         <li><code>fetch()</code> отправляет GET, POST, PATCH и DELETE; <code>async/await</code> ждёт ответ.</li>
         <li><code>response.ok</code> проверяет HTTP-ответ; <code>try/catch/finally</code> обрабатывает ошибку и возвращает кнопки в рабочее состояние.</li>
@@ -72,6 +73,7 @@
       <p>DummyJSON не сохраняет POST, PATCH и DELETE на сервере. Задачи, созданные здесь, затем изменяются и удаляются локально; для исходных задач PATCH и DELETE отправляются в API.</p>
     </details>
   </main>
+  <script src="API.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
