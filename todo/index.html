@@ -18,16 +18,26 @@
       <p>Добавляйте задачи, отмечайте выполненные, меняйте текст и удаляйте ненужные.</p>
     </header>
 
-    <form id="todo-form" class="todo-form">
-      <label for="todo-input">Новая задача</label>
-      <div class="todo-form-row">
-        <input id="todo-input" name="todo" type="text" maxlength="200" required placeholder="Что нужно сделать?" autocomplete="off">
-        <button id="todo-add-btn" class="action-button" type="submit">Добавить</button>
-      </div>
-    </form>
+    <div class="list-heading">
+      <h2>Все задачи <span id="todo-count" class="count-badge">0 / 0</span></h2>
+      <button id="todo-new-btn" class="action-button" type="button" disabled>＋ Добавить задачу</button>
+    </div>
+    <div class="search-controls">
+      <label for="todo-search">Поиск по названию
+        <input id="todo-search" type="search" placeholder="Введите название задачи" autocomplete="off">
+      </label>
+      <label for="todo-sort">Сортировка (через API)
+        <select id="todo-sort">
+          <option value="">Без сортировки</option>
+          <option value="asc">А–Я / A–Z</option>
+          <option value="desc">Я–А / Z–A</option>
+        </select>
+      </label>
+    </div>
 
     <p class="hint">DummyJSON имитирует изменения. После подтверждения они сохраняются в этом браузере.</p>
     <p id="todo-status" class="todo-status" role="status" aria-live="polite">Загрузка задач…</p>
+    <button id="todo-retry" class="todo-secondary-button" type="button" hidden>Повторить загрузку</button>
     <div id="todo-filters" class="todo-filters" role="group" aria-label="Фильтр задач">
       <button type="button" data-filter="all" aria-pressed="true" aria-controls="todo-list">Все</button>
       <button type="button" data-filter="active" aria-pressed="false" aria-controls="todo-list">Незаконченные</button>
@@ -40,12 +50,15 @@
         <input class="todo-checkbox" type="checkbox">
         <div class="todo-content">
           <span class="todo-text"></span>
-          <input class="todo-edit-input" type="text" maxlength="200" aria-label="Изменить текст задачи" hidden>
+          <button class="todo-user" type="button" data-action="profile" aria-haspopup="dialog">
+            <img class="user-avatar" alt="" width="24" height="24" loading="lazy">
+            <span class="user-handle"></span>
+          </button>
+          <span class="task-state"></span>
           <small class="todo-local-note" hidden>Создано в этом браузере</small>
         </div>
         <div class="todo-actions">
           <button class="todo-secondary-button" type="button" data-action="edit">Изменить</button>
-          <button class="todo-secondary-button" type="button" data-action="cancel" hidden>Отмена</button>
           <button class="todo-delete-button" type="button" data-action="delete">Удалить</button>
         </div>
       </li>
@@ -53,6 +66,7 @@
 
     <details class="reference">
       <summary>Справочник по HTML и JavaScript</summary>
+      <p><a href="reference.html">Полный справочник: теги, API, функции, события и разбор всех действий →</a></p>
       <p>Запуск: откройте этот файл <code>index.html</code> в браузере. Python, бэкенд и установка пакетов не нужны; для DummyJSON нужен интернет.</p>
       <h2>HTML-теги</h2>
       <ul>
@@ -62,10 +76,13 @@
         <li><code>&lt;ul&gt;</code> и <code>&lt;li&gt;</code> — список и отдельная задача.</li>
         <li><code>&lt;input type="checkbox"&gt;</code> — отметка «Сделано».</li>
         <li><code>&lt;template&gt;</code> — невидимый образец строки, который копирует JavaScript.</li>
+        <li><code>&lt;dialog&gt;</code> — модальное окно; <code>showModal()</code> открывает его, <code>close()</code> закрывает.</li>
+        <li><code>&lt;select&gt;</code> — выбор исполнителя и направления сортировки.</li>
         <li><code>&lt;p role="status"&gt;</code> — сообщение о загрузке, результате или ошибке.</li>
       </ul>
       <h2>JavaScript</h2>
       <p><code>API.js</code> отправляет запросы к DummyJSON; <code>script.js</code> управляет интерфейсом и локальным сохранением изменений.</p>
+      <p><code>/users?limit=0</code> загружает пользователей. Поле <code>userId</code> задачи связывается с <code>id</code> пользователя. Сортировка запрашивается через <code>/todos?limit=0&amp;sortBy=todo&amp;order=asc</code> (или <code>desc</code>), поиск по названию фильтрует загруженные задачи.</p>
       <ul>
         <li><code>fetch()</code> отправляет GET, POST, PATCH и DELETE; <code>async/await</code> ждёт ответ.</li>
         <li><code>response.ok</code> проверяет HTTP-ответ; <code>try/catch/finally</code> обрабатывает ошибку и возвращает кнопки в рабочее состояние.</li>
@@ -78,6 +95,65 @@
       <p>DummyJSON не сохраняет POST, PATCH и DELETE на сервере. Задачи, созданные здесь, затем изменяются и удаляются локально; для исходных задач PATCH и DELETE отправляются в API.</p>
     </details>
   </main>
+  <dialog id="profile-dialog" class="modal profile-modal" aria-labelledby="profile-title">
+    <div class="modal-heading">
+      <h2 id="profile-title">Профиль исполнителя</h2>
+      <button class="todo-secondary-button" type="button" data-close="profile-dialog" aria-label="Закрыть профиль">✕</button>
+    </div>
+    <p id="profile-status" role="status" aria-live="polite"></p>
+    <button id="profile-retry" class="todo-secondary-button" type="button" hidden>Повторить загрузку задач исполнителя</button>
+    <div class="profile-grid">
+      <section aria-label="Информация о пользователе">
+        <div class="profile-person">
+          <img id="profile-avatar" class="profile-avatar" alt="" width="96" height="96">
+          <div><h3 id="profile-name"></h3><p id="profile-handle" class="hint"></p></div>
+        </div>
+        <dl id="profile-details" class="profile-details"></dl>
+      </section>
+      <section aria-labelledby="profile-tasks-title">
+        <div class="list-heading">
+          <h3 id="profile-tasks-title">Задачи исполнителя</h3>
+          <button id="profile-add-btn" class="todo-secondary-button" type="button">＋ Добавить</button>
+        </div>
+        <div class="search-controls profile-controls">
+          <label for="profile-filter">Статус задачи
+            <select id="profile-filter" aria-controls="profile-todos">
+              <option value="all">Все задачи</option>
+              <option value="completed">Выполнено</option>
+              <option value="active">Не выполнено</option>
+            </select>
+          </label>
+          <label for="profile-sort">Сортировка (через API)
+            <select id="profile-sort" aria-controls="profile-todos">
+              <option value="">Без сортировки</option>
+              <option value="asc">А–Я / A–Z</option>
+              <option value="desc">Я–А / Z–A</option>
+            </select>
+          </label>
+        </div>
+        <p id="profile-count" class="hint" aria-live="polite"></p>
+        <ul id="profile-todos" class="todo-list" aria-label="Задачи исполнителя"></ul>
+      </section>
+    </div>
+  </dialog>
+  <dialog id="todo-dialog" class="modal" aria-labelledby="todo-dialog-title">
+    <div class="modal-heading"><h2 id="todo-dialog-title">Новая задача</h2></div>
+    <form id="todo-form" class="todo-form">
+      <label for="todo-input">Название задачи</label>
+      <input id="todo-input" name="todo" type="text" maxlength="200" required placeholder="Что нужно сделать?" autocomplete="off" autofocus>
+      <label for="todo-user">Исполнитель</label>
+      <select id="todo-user" name="userId" required></select>
+      <label class="completion-label" for="todo-completed">
+        <input id="todo-completed" name="completed" type="checkbox">
+        <span id="todo-completed-label">Не выполнено</span>
+      </label>
+      <p id="todo-form-status" role="status" aria-live="polite"></p>
+      <div class="modal-actions">
+        <button id="todo-add-btn" class="action-button" type="submit">✓ Добавить</button>
+        <button class="todo-secondary-button" type="button" data-close="todo-dialog">Отмена</button>
+      </div>
+    </form>
+  </dialog>
   <script src="API.js"></script>
   <script src="script.js"></script>
 </body>
