@@ -1,386 +1,211 @@
-// DummyJSON имитирует запись: накладываем локальные изменения на ответы API.
-const TODO_STORAGE_KEY = "front_back_project.todos.v1";
-const byId = id => document.getElementById(id);
-const todoForm = byId("todo-form");
-const todoInput = byId("todo-input");
-const todoList = byId("todo-list");
-const todoDialog = byId("todo-dialog");
-const profileDialog = byId("profile-dialog");
-const todoTemplate = byId("todo-item-template");
-let serverTodos = [];
-let users = new Map();
-let activeFilter = "all";
-let activeSort = "";
-let editingTodoKey = null;
-let profileUserId = null;
-let profileServerTodos = [];
-let profileFilter = "all";
-let profileSort = "";
-let profileRequest = 0;
-let sortRequest = 0;
-let formBusy = false;
-const busyTodoKeys = new Set();
-
-function readTodoChanges() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(TODO_STORAGE_KEY));
-    if (saved && Array.isArray(saved.created) && Array.isArray(saved.deleted) &&
-        saved.updated && typeof saved.updated === "object") return saved;
-  } catch (error) { console.warn("Не удалось прочитать сохранённые задачи:", error); }
-  return { created: [], updated: {}, deleted: [] };
-}
-const todoChanges = readTodoChanges();
-
-function setTodoStatus(message, isError = false) {
-  for (const element of [byId("todo-status"), byId("profile-status")]) {
-    element.textContent = message;
-    element.classList.toggle("error", isError);
+// Данные 3-х программистов
+const programmers = [
+  {
+    name: "Есенсары Нұрдаулет",
+    role: "Junior Backend Developer",
+    photo: "assets/Nurdaulet.jpeg",
+    about: "Студент 3-го курса по специальности «Computer Engineering and Software». Увлекаюсь веб-разработкой и созданием пользовательских интерфейсов, активно изучаю современные технологии программирования.",
+    skills: ["HTML5", "CSS3", "JavaScript", "Python", "Linux", "Git"],
+    experience: "Учебные проекты по разработке веб-страниц и автоматизации задач с использованием скриптов.",
+    contacts: "Telegram: @prfctiv | Email: timushl404@gmail.com"
+  },
+  {
+    name: "Жусупова Дана",
+    role: "UX/UI designer",
+    photo: "assets/Dana.jpeg",
+    about: "UI/UX дизайнер с фокусом на создание чистых и функциональных интерфейсов.",
+    skills: [
+      "Figma",
+      "Adobe Photoshop",
+      "Adobe Illustrator",
+      "UI/UX Design",
+      "HTML/CSS"
+    ],
+    experience: "Учебные проекты по разработке веб-страниц и автоматизации задач с использованием скриптов.",
+    contacts: "Telegram: hazahahahahz | Email: zhusupovad055@gmail.com"
+  },
+  {
+    name: "Әмірхан Асылхан",
+    role: "Frontend Разработчик",
+    photo: "assets/Asylkhan.jpeg",
+    about: "Студент 3-го курса, учусь в университете AIU. Увлекаюсь фронтенд разработкой.",
+    skills: ["HTML", "CSS", "Javascript", "React", "Python", "C++", "Typescript", "Java"],
+    experience: "3 года",
+    contacts: "Telegram: @as1kqlw | Email: asylhkanamyrhkan@gmail.com"
   }
-}
+];
 
-function saveTodoChanges(message) {
-  try {
-    localStorage.setItem(TODO_STORAGE_KEY, JSON.stringify(todoChanges));
-    setTodoStatus(message);
-  } catch {
-    setTodoStatus("Изменение выполнено, но браузер не смог сохранить его для следующего открытия.", true);
-  }
-}
 
-function todoKey(todo) { return todo.localKey || `server-${todo.id}`; }
+function switchTab(target) {
 
-function mergeTodoChanges(source, order = "") {
-  const deleted = new Set(todoChanges.deleted);
-  const tasks = [
-    ...todoChanges.created,
-    ...source.filter(todo => !deleted.has(todo.id)).map(todo => ({
-      ...todo, ...todoChanges.updated[todo.id]
-    }))
-  ];
-  // API сортирует исходные задачи; локальные названия включаем в тот же порядок.
-  if (order && (todoChanges.created.length || Object.values(todoChanges.updated).some(change => "todo" in change))) {
-    tasks.sort((a, b) => a.todo.localeCompare(b.todo, ["ru", "en"], { sensitivity: "base" }) * (order === "asc" ? 1 : -1));
-  }
-  return tasks;
-}
+  const tabButtons = document.querySelectorAll(".tab-btn");
+  tabButtons.forEach(btn => btn.classList.remove("active"));
 
-function getTodos() { return mergeTodoChanges(serverTodos, activeSort); }
+  const views = document.querySelectorAll(".tab-view");
+  views.forEach(view => view.classList.remove("active"));
 
-function getProfileTodos() {
-  return mergeTodoChanges(profileServerTodos, profileSort).filter(todo => Number(todo.userId) === profileUserId);
-}
+  if (target === "main") {
 
-function setAvatar(image, user) {
-  image.hidden = !user?.image;
-  image.onerror = () => { image.hidden = true; };
-  if (user?.image) image.src = user.image;
-  else image.removeAttribute("src");
-}
+    document.getElementById("tab-btn-main").classList.add("active");
+    document.getElementById("view-main").classList.add("active");
+  } else if (typeof target === "number" && programmers[target]) {
 
-function renderList(list, tasks, showUser = true) {
-  const fragment = document.createDocumentFragment();
-  if (!tasks.length) {
-    const empty = document.createElement("li");
-    empty.className = "todo-empty";
-    empty.textContent = "Задачи не найдены.";
-    fragment.append(empty);
-  }
-  for (const todo of tasks) {
-    const item = todoTemplate.content.firstElementChild.cloneNode(true);
-    const field = selector => item.querySelector(selector);
-    const key = todoKey(todo);
-    const user = users.get(Number(todo.userId));
-    item.dataset.key = key;
-    item.classList.toggle("completed", Boolean(todo.completed));
-    field(".todo-checkbox").checked = Boolean(todo.completed);
-    field(".todo-checkbox").setAttribute("aria-label", `${todo.completed ? "Отметить невыполненной" : "Отметить выполненной"}: ${todo.todo}`);
-    field(".todo-text").textContent = todo.todo;
-    field(".task-state").textContent = todo.completed ? "Выполнено" : "Не выполнено";
-    field(".todo-local-note").hidden = !todo.localKey;
-    field(".todo-user").hidden = !showUser;
-    field(".user-handle").textContent = user ? `@${user.username}` : `Исполнитель · ID ${todo.userId}`;
-    field(".todo-user").title = user ? `Открыть профиль ${user.firstName} ${user.lastName}` : "Пользователь недоступен";
-    setAvatar(field(".user-avatar"), user);
-    item.querySelectorAll("button, input").forEach(control => { control.disabled = busyTodoKeys.has(key); });
-    field(".todo-user").disabled = !user;
-    fragment.append(item);
-  }
-  list.replaceChildren(fragment);
-}
+    const btn = document.getElementById("tab-btn-" + target);
+    if (btn) btn.classList.add("active");
 
-function renderTodos() {
-  const tasks = getTodos();
-  const query = byId("todo-search").value.trim().toLocaleLowerCase();
-  const visible = tasks.filter(todo =>
-    (activeFilter === "all" || (activeFilter === "completed" ? todo.completed : !todo.completed)) &&
-    todo.todo.toLocaleLowerCase().includes(query));
-  renderList(todoList, visible);
-  byId("todo-count").textContent = `${visible.length} / ${tasks.length}`;
-  if (profileDialog.open) renderProfileTasks();
-}
+    const dev = programmers[target];
+    document.getElementById("resumePhoto").src = dev.photo;
+    document.getElementById("resumePhoto").alt = dev.name;
+    document.getElementById("resumeName").textContent = dev.name;
+    document.getElementById("resumeRole").textContent = dev.role;
+    document.getElementById("resumeAbout").textContent = dev.about;
 
-function renderProfileTasks() {
-  const tasks = getProfileTodos();
-  const visible = tasks.filter(todo => profileFilter === "all" || (profileFilter === "completed" ? todo.completed : !todo.completed));
-  const completed = tasks.filter(todo => todo.completed).length;
-  byId("profile-count").textContent = `Показано: ${visible.length} / ${tasks.length} · Выполнено: ${completed} · Не выполнено: ${tasks.length - completed}`;
-  renderList(byId("profile-todos"), visible, false);
-}
+    const badge = document.getElementById("resumeBadge");
+    if (badge) badge.textContent = dev.role;
 
-async function fetchProfileTodos() {
-  if (!profileDialog.open) return;
-  const request = ++profileRequest;
-  const userId = profileUserId;
-  const filter = byId("profile-filter").value;
-  const order = byId("profile-sort").value;
-  const status = byId("profile-status");
-  status.textContent = "Загрузка задач исполнителя…";
-  status.classList.remove("error");
-  byId("profile-todos").setAttribute("aria-busy", "true");
-  byId("profile-retry").hidden = true;
-  try {
-    // В /todos нет документированного фильтра completed: каждый выбор делает GET,
-    // сервер сортирует, затем браузер применяет userId, статус и локальные изменения.
-    const result = await todoApi.getAll(order);
-    if (request !== profileRequest || userId !== profileUserId || !profileDialog.open) return;
-    profileServerTodos = result;
-    profileFilter = filter;
-    profileSort = order;
-    renderProfileTasks();
-    status.textContent = "Задачи исполнителя обновлены.";
-  } catch (error) {
-    if (request !== profileRequest || userId !== profileUserId || !profileDialog.open) return;
-    byId("profile-filter").value = profileFilter;
-    byId("profile-sort").value = profileSort;
-    status.textContent = `Не удалось загрузить задачи исполнителя: ${error.message}. Повторите загрузку.`;
-    status.classList.add("error");
-    byId("profile-retry").hidden = false;
-  } finally {
-    if (request === profileRequest) byId("profile-todos").setAttribute("aria-busy", "false");
-  }
-}
-
-function openProfile(userId) {
-  const user = users.get(Number(userId));
-  if (!user) return;
-  profileUserId = Number(userId);
-  profileServerTodos = [...serverTodos].sort((a, b) => a.id - b.id);
-  profileFilter = "all";
-  profileSort = "";
-  byId("profile-filter").value = "all";
-  byId("profile-sort").value = "";
-  setAvatar(byId("profile-avatar"), user);
-  byId("profile-name").textContent = `${user.firstName} ${user.lastName}`;
-  byId("profile-handle").textContent = `@${user.username} · ID ${user.id}`;
-  byId("profile-status").textContent = "";
-  const details = [
-    ["Email", user.email], ["Телефон", user.phone], ["Возраст", user.age],
-    ["Пол", ({ male: "Мужской", female: "Женский" })[user.gender] || user.gender],
-    ["Дата рождения", user.birthDate],
-    ["Адрес", [user.address?.address, user.address?.city, user.address?.state, user.address?.country].filter(Boolean).join(", ")],
-    ["Индекс", user.address?.postalCode], ["Компания", user.company?.name],
-    ["Отдел", user.company?.department], ["Должность", user.company?.title],
-    ["Университет", user.university], ["Роль", user.role],
-    ["Рост / вес", user.height != null && user.weight != null ? `${user.height} см / ${user.weight} кг` : null],
-    ["Группа крови", user.bloodGroup]
-  ];
-  byId("profile-details").replaceChildren();
-  for (const [label, value] of details) {
-    const term = document.createElement("dt");
-    const description = document.createElement("dd");
-    term.textContent = label;
-    description.textContent = value ?? "—";
-    byId("profile-details").append(term, description);
-  }
-  renderProfileTasks();
-  profileDialog.showModal();
-  fetchProfileTodos();
-}
-
-function updateCompletionLabel() {
-  byId("todo-completed-label").textContent = byId("todo-completed").checked ? "Выполнено" : "Не выполнено";
-}
-
-function openTodoForm(todo = null, userId = null) {
-  editingTodoKey = todo ? todoKey(todo) : null;
-  todoForm.reset();
-  todoInput.setCustomValidity("");
-  todoInput.value = todo?.todo || "";
-  byId("todo-user").value = String(todo?.userId ?? userId ?? users.keys().next().value);
-  byId("todo-completed").checked = Boolean(todo?.completed);
-  updateCompletionLabel();
-  byId("todo-dialog-title").textContent = todo ? "Изменить задачу" : "Новая задача";
-  byId("todo-add-btn").textContent = todo ? "✓ Сохранить" : "✓ Добавить";
-  byId("todo-form-status").textContent = "";
-  todoDialog.showModal();
-  todoInput.focus();
-}
-
-byId("todo-new-btn").addEventListener("click", () => openTodoForm());
-byId("profile-add-btn").addEventListener("click", () => openTodoForm(null, profileUserId));
-byId("profile-filter").addEventListener("change", fetchProfileTodos);
-byId("profile-sort").addEventListener("change", fetchProfileTodos);
-byId("profile-retry").addEventListener("click", fetchProfileTodos);
-byId("todo-completed").addEventListener("change", updateCompletionLabel);
-todoInput.addEventListener("input", () => todoInput.setCustomValidity(""));
-byId("todo-search").addEventListener("input", renderTodos);
-byId("todo-sort").addEventListener("change", fetchTodos);
-byId("todo-retry").addEventListener("click", loadData);
-byId("todo-filters").addEventListener("click", event => {
-  const button = event.target.closest("button[data-filter]");
-  if (!button) return;
-  activeFilter = button.dataset.filter;
-  byId("todo-filters").querySelectorAll("button").forEach(item => {
-    item.setAttribute("aria-pressed", String(item.dataset.filter === activeFilter));
-  });
-  renderTodos();
-});
-
-document.querySelectorAll("[data-close]").forEach(button => {
-  button.addEventListener("click", () => byId(button.dataset.close).close());
-});
-todoDialog.addEventListener("cancel", event => { if (formBusy) event.preventDefault(); });
-todoDialog.addEventListener("close", () => {
-  editingTodoKey = null;
-  if (profileDialog.open) byId("profile-add-btn").focus();
-  else byId("todo-new-btn").focus();
-});
-profileDialog.addEventListener("close", () => {
-  ++profileRequest; // Ответ закрытого профиля не должен менять следующий профиль.
-  byId("profile-todos").setAttribute("aria-busy", "false");
-  byId("todo-new-btn").focus();
-});
-
-// Главный список и профиль используют одинаковые операции и общее состояние.
-for (const list of [todoList, byId("profile-todos")]) {
-  const fromEvent = event => (list === todoList ? getTodos() : getProfileTodos()).find(todo => todoKey(todo) === event.target.closest(".todo-item")?.dataset.key);
-  list.addEventListener("change", event => {
-    if (event.target.matches(".todo-checkbox")) mutateTodo(fromEvent(event), { completed: event.target.checked });
-  });
-  list.addEventListener("click", event => {
-    const button = event.target.closest("button[data-action]");
-    const todo = fromEvent(event);
-    if (!button || !todo) return;
-    if (button.dataset.action === "profile") openProfile(todo.userId);
-    if (button.dataset.action === "edit") openTodoForm(todo);
-    if (button.dataset.action === "delete") mutateTodo(todo, null);
-  });
-}
-
-async function fetchTodos() {
-  const request = ++sortRequest;
-  const order = byId("todo-sort").value;
-  setTodoStatus("Загрузка задач…");
-  todoList.setAttribute("aria-busy", "true");
-  try {
-    const result = await todoApi.getAll(order);
-    if (request !== sortRequest) return;
-    serverTodos = result;
-    activeSort = order;
-    byId("todo-retry").hidden = users.size > 0;
-    renderTodos();
-    setTodoStatus(users.size ? `Загружено задач: ${getTodos().length}` : "Задачи загружены. Ожидаем пользователей…");
-  } catch (error) {
-    if (request !== sortRequest) return;
-    byId("todo-sort").value = activeSort;
-    byId("todo-retry").hidden = false;
-    renderTodos();
-    setTodoStatus(`Не удалось загрузить задачи: ${error.message}. Повторите загрузку.`, true);
-  } finally {
-    if (request === sortRequest) todoList.setAttribute("aria-busy", "false");
-  }
-}
-
-async function loadData() {
-  byId("todo-retry").disabled = true;
-  const results = await Promise.allSettled([fetchTodos(), todoApi.getUsers()]);
-  if (results[1].status === "fulfilled") {
-    users = new Map(results[1].value.map(user => [Number(user.id), user]));
-    const options = [...users.values()].map(user => {
-      const option = document.createElement("option");
-      option.value = user.id;
-      option.textContent = `${user.firstName} ${user.lastName} (@${user.username}) · ID ${user.id}`;
-      return option;
+    const skillsList = document.getElementById("resumeSkills");
+    skillsList.innerHTML = "";
+    dev.skills.forEach(skill => {
+      const chip = document.createElement("span");
+      chip.className = "skill-chip";
+      chip.textContent = skill;
+      skillsList.appendChild(chip);
     });
-    byId("todo-user").replaceChildren(...options);
-    byId("todo-new-btn").disabled = !users.size;
-    if (!byId("todo-status").classList.contains("error")) {
-      byId("todo-retry").hidden = true;
-      setTodoStatus(`Загружено задач: ${getTodos().length}`);
-    }
-  } else {
-    byId("todo-retry").hidden = false;
-    setTodoStatus(`Не удалось загрузить пользователей: ${results[1].reason.message}. Повторите загрузку.`, true);
+
+    document.getElementById("resumeExperience").textContent = dev.experience;
+    document.getElementById("resumeContacts").textContent = dev.contacts;
+
+    document.getElementById("view-resume").classList.add("active");
+  } else if (["task1", "task2", "task3", "task4"].includes(target)) {
+    document.getElementById("tab-btn-" + target).classList.add("active");
+    document.getElementById("view-" + target).classList.add("active");
   }
-  byId("todo-retry").disabled = false;
-  renderTodos();
+
+  window.scrollTo(0, 0);
 }
 
-async function mutateTodo(todo, changes) {
-  if (!todo || busyTodoKeys.has(todoKey(todo))) return false;
-  const key = todoKey(todo);
-  busyTodoKeys.add(key);
-  renderTodos();
-  try {
-    if (changes === null) {
-      if (todo.localKey) todoChanges.created = todoChanges.created.filter(item => todoKey(item) !== key);
-      else {
-        await todoApi.remove(todo.id);
-        todoChanges.deleted.push(todo.id);
-        delete todoChanges.updated[todo.id];
-      }
-    } else if (todo.localKey) {
-      Object.assign(todoChanges.created.find(item => todoKey(item) === key), changes);
-    } else {
-      await todoApi.update(todo.id, changes);
-      todoChanges.updated[todo.id] = { ...todoChanges.updated[todo.id], ...changes };
-    }
-    saveTodoChanges(changes === null ? "Задача удалена." : "Задача обновлена.");
-    return true;
-  } catch (error) {
-    const message = `Не удалось ${changes === null ? "удалить" : "обновить"} задачу: ${error.message}`;
-    setTodoStatus(message, true);
-    if (todoDialog.open) byId("todo-form-status").textContent = message;
-    return false;
-  } finally {
-    busyTodoKeys.delete(key);
-    renderTodos();
-  }
-}
+// 1-тапсырма: барлық өзгеріс тек батырманы басқанда орындалады.
+const greeting = document.getElementById("greeting");
+const greetingBatyrmasy = document.getElementById("change-greeting-btn");
+greetingBatyrmasy.onclick = function () {
+  greeting.textContent = "Сәлем, әлем!";
+};
 
-todoForm.addEventListener("submit", async event => {
-  event.preventDefault();
-  if (formBusy) return;
-  const task = { todo: todoInput.value.trim(), userId: Number(byId("todo-user").value), completed: byId("todo-completed").checked };
-  if (!task.todo) {
-    todoInput.setCustomValidity("Введите название задачи.");
-    todoInput.reportValidity();
-    return;
-  }
-  if (!users.has(task.userId)) {
-    byId("todo-form-status").textContent = "Выберите исполнителя. Если список пуст, повторите загрузку пользователей.";
-    return;
-  }
-  formBusy = true;
-  todoForm.querySelectorAll("input, select, button").forEach(control => { control.disabled = true; });
-  byId("todo-form-status").textContent = "Сохранение…";
-  try {
-    if (editingTodoKey) {
-      const todo = [...getTodos(), ...getProfileTodos()].find(item => todoKey(item) === editingTodoKey);
-      if (await mutateTodo(todo, task)) todoDialog.close();
-    } else {
-      const created = await todoApi.create(task);
-      todoChanges.created.unshift({ ...created, ...task, localKey: `local-${Date.now()}-${Math.random()}` });
-      saveTodoChanges("Задача добавлена.");
-      renderTodos();
-      todoDialog.close();
-    }
-  } catch (error) {
-    byId("todo-form-status").textContent = `Не удалось сохранить задачу: ${error.message}`;
-  } finally {
-    formBusy = false;
-    todoForm.querySelectorAll("input, select, button").forEach(control => { control.disabled = false; });
-  }
+const changeableParagraph = document.getElementById("changeable-paragraph");
+const ozgertuBatyrmasy = document.getElementById("change-text-btn");
+function changeParagraphStyle() {
+  changeableParagraph.classList.toggle("changed");
+}
+ozgertuBatyrmasy.onclick = changeParagraphStyle;
+
+const divKosuBatyrmasy = document.getElementById("add-div-btn");
+divKosuBatyrmasy.onclick = function () {
+  const janaDiv = document.createElement("div");
+  janaDiv.className = "new-div";
+  janaDiv.textContent = "Мен жаңа элементпін";
+  document.body.appendChild(janaDiv);
+  divKosuBatyrmasy.disabled = true;
+  divKosuBatyrmasy.textContent = "Жаңа div қосылды";
+};
+
+const zhouBatyrmasy = document.getElementById("delete-old-btn");
+zhouBatyrmasy.onclick = function () {
+  document.querySelector(".old-element").remove();
+  zhouBatyrmasy.disabled = true;
+  zhouBatyrmasy.textContent = "Элемент жойылды";
+};
+
+// 2-тапсырма: класты ауыстыру және барлық кластарды шығару.
+const classDemo = document.getElementById("class-demo");
+const toggleClassButton = document.getElementById("toggle-class-btn");
+function showClasses() {
+  const classes = Array.from(classDemo.classList).join(", ");
+  document.getElementById("class-list").textContent = "Кластар тізімі: " + classes;
+  console.log("Кластар тізімі:", classes);
+}
+toggleClassButton.addEventListener("click", () => {
+  const active = classDemo.classList.toggle("active");
+  toggleClassButton.textContent = active ? "active класын жою" : "active класын қосу";
+  toggleClassButton.setAttribute("aria-pressed", String(active));
+  showClasses();
 });
+showClasses();
 
-loadData();
+// 3-тапсырма: пайдаланушы енгізген жолдар мен бағандар санымен кесте құру.
+const zholEngizu = document.getElementById("rows-input");
+const baganEngizu = document.getElementById("cols-input");
+const kesteBatyrmasy = document.getElementById("build-table-btn");
+const kesteOrny = document.getElementById("table-container");
+const sanaqMati = document.getElementById("colored-counter");
+const kesteKatesi = document.getElementById("table-error");
+
+// Боялған ұяшықтарды санап, есептегіштің мәтінін жаңартады.
+function boyaulySana() {
+  const boyaulyUyashyktar = document.querySelectorAll(".colored");
+  sanaqMati.textContent = "Боялған ұяшықтар саны: " + boyaulyUyashyktar.length;
+}
+
+// Кестені жасайды және әр ұяшыққа түсті ауыстыру әрекетін қосады.
+function kesteKuru() {
+  const zholSany = Number(zholEngizu.value);
+  const baganSany = Number(baganEngizu.value);
+
+  kesteKatesi.textContent = "";
+  zholEngizu.removeAttribute("aria-invalid");
+  baganEngizu.removeAttribute("aria-invalid");
+
+  const zholBos = zholEngizu.value.trim() === "";
+  const baganBos = baganEngizu.value.trim() === "";
+  if (zholBos || baganBos) {
+    kesteKatesi.textContent = "Кесте өлшемін енгізіңіз.";
+  } else if (!Number.isInteger(zholSany) || !Number.isInteger(baganSany) || zholSany < 1 || baganSany < 1) {
+    kesteKatesi.textContent = "Жол мен баған саны 0-ден үлкен болуы керек.";
+  } else if (zholSany > 20 || baganSany > 20) {
+    kesteKatesi.textContent = "Жол мен баған саны 20-дан аспауы керек.";
+  }
+
+  if (kesteKatesi.textContent) {
+    if (zholBos || !Number.isInteger(zholSany) || zholSany < 1 || zholSany > 20) zholEngizu.setAttribute("aria-invalid", "true");
+    if (baganBos || !Number.isInteger(baganSany) || baganSany < 1 || baganSany > 20) baganEngizu.setAttribute("aria-invalid", "true");
+    return;
+  }
+
+  kesteOrny.innerHTML = "";
+
+  const keste = document.createElement("table");
+  keste.className = "dynamic-table";
+
+  for (let zhol = 0; zhol < zholSany; zhol++) {
+    const kesteZholy = document.createElement("tr");
+    for (let bagan = 0; bagan < baganSany; bagan++) {
+      const uyashyk = document.createElement("td");
+      uyashyk.textContent = (zhol + 1) + ":" + (bagan + 1);
+      uyashyk.onclick = function () {
+        uyashyk.classList.toggle("colored");
+        boyaulySana();
+      };
+      kesteZholy.appendChild(uyashyk);
+    }
+    keste.appendChild(kesteZholy);
+  }
+  kesteOrny.appendChild(keste);
+  boyaulySana();
+}
+
+kesteBatyrmasy.onclick = kesteKuru;
+kesteKuru();
+
+// 4-тапсырма: батырманы басқанда ашық және қараңғы тақырыптарды ауыстыру.
+const temaBatyrmasy = document.getElementById("theme-toggle-btn");
+const temaMati = document.getElementById("theme-status");
+
+temaBatyrmasy.onclick = function () {
+  document.body.classList.toggle("light-theme");
+  if (document.body.classList.contains("light-theme")) {
+    temaMati.textContent = "Қазір ашық тақырып қосулы.";
+    temaBatyrmasy.textContent = "Қараңғы тақырыпты қосу";
+  } else {
+    temaMati.textContent = "Қазір қараңғы тақырып қосулы.";
+    temaBatyrmasy.textContent = "Ашық тақырыпты қосу";
+  }
+};
