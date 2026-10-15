@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Справочник по коду To-Do</title>
+  <script src="theme.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .guide { line-height: 1.75; }
+    .guide a { color: var(--accent); }
+    .guide section { margin-top: 36px; scroll-margin-top: 20px; }
+    .guide h2 { font-size: 24px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .guide h3 { margin-top: 24px; font-size: 18px; }
+    .guide code { color: var(--code); overflow-wrap: anywhere; }
+    .guide pre { padding: 16px; border-radius: 10px; background: var(--item); overflow: auto; line-height: 1.6; }
+    .guide pre code { overflow-wrap: normal; }
+    .guide .table-wrap { overflow-x: auto; }
+    .guide table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .guide th, .guide td { text-align: left; vertical-align: top; padding: 10px; border: 1px solid var(--border); }
+    .guide th { background: var(--item); }
+    .guide li + li { margin-top: 8px; }
+    .guide .note { padding: 14px 18px; border-left: 3px solid var(--accent); background: var(--item); }
+    @media print {
+      body { padding: 0; background: white; color: black; }
+      .app { width: 100%; border: 0; box-shadow: none; padding: 0; }
+      .theme-toggle { display: none; }
+      .guide pre { white-space: pre-wrap; }
+      .guide a, .guide code { color: inherit; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app guide">
+    <header class="heading">
+      <div class="heading-toolbar">
+        <a href="index.html">← К задачам</a>
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="true">Сменить тему</button>
+      </div>
+      <h1>Как устроен To-Do</h1>
+      <p>Справочник по текущему приложению: от HTML-тегов до запросов, профилей исполнителей и сохранения изменений.</p>
+    </header>
+    <nav aria-label="Содержание справочника">
+      <ol>
+        <li><a href="#files">Файлы и запуск</a></li>
+        <li><a href="#html">HTML: теги и атрибуты</a></li>
+        <li><a href="#data">Данные, переменные, связь задачи с исполнителем</a></li>
+        <li><a href="#api">API.js: HTTP-запросы</a></li>
+        <li><a href="#render">Отрисовка задачи и положение ника</a></li>
+        <li><a href="#filters">Поиск, фильтры и сортировка двух списков</a></li>
+        <li><a href="#crud">Добавление, редактирование, статус и удаление</a></li>
+        <li><a href="#storage">localStorage и особенности DummyJSON</a></li>
+        <li><a href="#functions">Карта функций script.js</a></li>
+        <li><a href="#syntax">JavaScript: конструкции и события</a></li>
+        <li><a href="#css">CSS, адаптивность и тема</a></li>
+        <li><a href="#checks">Проверка в браузере, тесты и вопросы для защиты</a></li>
+      </ol>
+    </nav>
+
+    <section id="files">
+      <h2>1. Файлы и запуск</h2>
+      <p>Открой <code>todo/index.html</code> в современном браузере. Для получения данных нужен интернет. У приложения нет собственного сервера: JavaScript обращается непосредственно к DummyJSON. Node.js и jsdom используются только для автоматических тестов.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Файл</th><th>За что отвечает</th></tr></thead>
+        <tbody>
+          <tr><td><code>index.html</code></td><td>Главный список, поиск, фильтры, шаблон строки, диалог профиля и форма задачи.</td></tr>
+          <tr><td><code>style.css</code></td><td>Цвета, размеры, сетки, кнопки, положение аватара и адаптация к узкому экрану.</td></tr>
+          <tr><td><code>API.js</code></td><td>Адреса API, GET/POST/PATCH/DELETE, проверка ответа и тайм-аут.</td></tr>
+          <tr><td><code>script.js</code></td><td>Состояние приложения, обработчики действий, профили, списки и сохранение изменений.</td></tr>
+          <tr><td><code>theme.js</code></td><td>Тёмная/светлая тема и запоминание выбора.</td></tr>
+          <tr><td><code>tests.cjs</code></td><td>Проверки логики с имитацией DOM и ответов API.</td></tr>
+          <tr><td><code>reference.html</code></td><td>Этот справочник; доступен по ссылке в конце страницы задач.</td></tr>
+        </tbody>
+      </table></div>
+      <p><code>theme.js</code> подключён в <code>&lt;head&gt;</code>, чтобы применить цвета до показа страницы. <code>API.js</code> и затем <code>script.js</code> подключены внизу <code>&lt;body&gt;</code>: элементы уже существуют, а объект <code>todoApi</code> доступен к моменту запуска логики.</p>
+    </section>
+
+    <section id="html">
+      <h2>2. HTML: теги и атрибуты</h2>
+      <p>HTML описывает структуру. В JavaScript используются функции, выражения и события — «тегами JavaScript» их обычно не называют. Тег <code>&lt;script&gt;</code> лишь подключает или содержит JavaScript.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Тег</th><th>Назначение в приложении</th></tr></thead>
+        <tbody>
+          <tr><td><code>&lt;html lang="ru"&gt;</code></td><td>Корень документа; язык помогает браузеру и программам чтения с экрана.</td></tr>
+          <tr><td><code>&lt;head&gt;, &lt;meta&gt;, &lt;title&gt;</code></td><td>Настройки страницы: UTF-8 для кириллицы, viewport для телефона, заголовок вкладки.</td></tr>
+          <tr><td><code>&lt;link&gt;, &lt;script&gt;</code></td><td>Подключают стили и код.</td></tr>
+          <tr><td><code>&lt;body&gt;, &lt;main&gt;, &lt;header&gt;</code></td><td>Видимая часть, основное содержимое и заголовок приложения.</td></tr>
+          <tr><td><code>&lt;section&gt;, &lt;h1&gt;–&lt;h3&gt;</code></td><td>Смысловые разделы и заголовки: информация о пользователе, его задачи.</td></tr>
+          <tr><td><code>&lt;div&gt;, &lt;span&gt;, &lt;p&gt;, &lt;small&gt;</code></td><td>Группировка, текст задачи, сообщения и примечание о локальной задаче.</td></tr>
+          <tr><td><code>&lt;ul&gt;, &lt;li&gt;</code></td><td>Список задач и одна строка списка.</td></tr>
+          <tr><td><code>&lt;template&gt;</code></td><td>Невидимый образец строки. Код клонирует его для каждой задачи.</td></tr>
+          <tr><td><code>&lt;button&gt;</code></td><td>Добавление, изменение, удаление, закрытие, ник исполнителя и переключение темы.</td></tr>
+          <tr><td><code>&lt;form&gt;, &lt;label&gt;</code></td><td>Форма задачи и подписи полей. <code>for</code> у label соответствует <code>id</code> поля.</td></tr>
+          <tr><td><code>&lt;input type="text"&gt;</code></td><td>Название задачи; <code>required</code> запрещает пустое значение, <code>maxlength="200"</code> ограничивает длину.</td></tr>
+          <tr><td><code>&lt;input type="search"&gt;</code></td><td>Поиск по названию в главном списке.</td></tr>
+          <tr><td><code>&lt;input type="checkbox"&gt;</code></td><td>Галочка. Состояние читается из <code>checked</code>, а не из <code>value</code>.</td></tr>
+          <tr><td><code>&lt;select&gt;, &lt;option&gt;</code></td><td>Исполнитель, направление сортировки и статус в профиле. Видимый текст option и его value могут отличаться.</td></tr>
+          <tr><td><code>&lt;dialog&gt;</code></td><td>Модальное окно. <code>showModal()</code> открывает его поверх страницы; <code>close()</code> закрывает.</td></tr>
+          <tr><td><code>&lt;img&gt;</code></td><td>Аватар. <code>src</code> берётся из пользователя; маленькая картинка имеет пустой alt, поскольку рядом уже указан ник.</td></tr>
+          <tr><td><code>&lt;dl&gt;, &lt;dt&gt;, &lt;dd&gt;</code></td><td>Список пар «поле — значение»: Email, телефон, компания и другие сведения.</td></tr>
+          <tr><td><code>&lt;details&gt;, &lt;summary&gt;</code></td><td>Раскрывающийся справочник в конце главной страницы.</td></tr>
+          <tr><td><code>&lt;a&gt;, &lt;code&gt;</code></td><td>Ссылки и обозначение фрагментов кода в справочнике.</td></tr>
+        </tbody>
+      </table></div>
+      <h3>Атрибуты, которые связывают HTML и код</h3>
+      <ul>
+        <li><code>id</code> — уникальный адрес элемента, например <code>profile-sort</code>. <code>class</code> — общая группа для оформления и поиска нескольких элементов.</li>
+        <li><code>data-action="edit"</code> хранит действие кнопки, а <code>data-key="server-1"</code> — ключ строки. JavaScript читает их через <code>dataset.action</code> и <code>dataset.key</code>.</li>
+        <li><code>type="submit"</code> отправляет форму. Остальные кнопки имеют <code>type="button"</code>, чтобы не отправить её случайно.</li>
+        <li><code>hidden</code> скрывает элемент; <code>disabled</code> блокирует действие на время запроса; <code>autofocus</code> задаёт первоначальное поле ввода.</li>
+        <li><code>aria-label</code> даёт элементу понятное имя. <code>aria-labelledby</code> связывает диалог с заголовком. <code>aria-controls</code> указывает список, которым управляет фильтр.</li>
+        <li><code>role="status"</code> и <code>aria-live="polite"</code> позволяют озвучивать изменения. <code>aria-pressed</code> обозначает выбранную кнопку, <code>aria-busy</code> — загрузку списка.</li>
+      </ul>
+    </section>
+
+    <section id="data">
+      <h2>3. Данные и связь с исполнителем</h2>
+      <p>Пример объекта задачи ниже учебный: значения показывают структуру и не привязаны к текущему набору API.</p>
+      <pre><code>const task = {
+  id: 1,
+  todo: "Подготовить презентацию",
+  completed: false,
+  userId: 26
+};</code></pre>
+      <p><code>id</code> — идентификатор задачи. <code>todo</code> — её название. <code>completed</code> — логическое значение статуса. <code>userId</code> — идентификатор назначенного исполнителя. Это не обязательно ID человека, который уже выполнил задачу: невыполненная задача тоже имеет исполнителя.</p>
+      <pre><code>users = new Map(results[1].value.map(user =&gt; [Number(user.id), user]));
+const user = users.get(Number(todo.userId));</code></pre>
+      <p><code>Map</code> хранит пары «ID → объект пользователя». Сначала числовые ID становятся ключами, затем по <code>todo.userId</code> находятся <code>username</code>, <code>image</code>, имя и остальные сведения. <code>Number()</code> нужен, поскольку значение из select является строкой.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Переменная</th><th>Что хранит</th></tr></thead>
+        <tbody>
+          <tr><td><code>serverTodos</code></td><td>Последний успешный ответ для главного списка.</td></tr>
+          <tr><td><code>activeFilter / activeSort</code></td><td>Статус и сортировка главного списка.</td></tr>
+          <tr><td><code>profileUserId</code></td><td>ID открытого исполнителя.</td></tr>
+          <tr><td><code>profileServerTodos</code></td><td>Отдельный ответ для профиля, полученный при его загрузке или переключении контролов.</td></tr>
+          <tr><td><code>profileFilter / profileSort</code></td><td>Последние успешно применённые настройки профиля.</td></tr>
+          <tr><td><code>sortRequest / profileRequest</code></td><td>Номера запросов: позволяют игнорировать устаревший ответ.</td></tr>
+          <tr><td><code>editingTodoKey</code></td><td>Ключ редактируемой задачи; <code>null</code> означает создание новой.</td></tr>
+          <tr><td><code>formBusy / busyTodoKeys</code></td><td>Защита от повторной отправки формы и повторных действий над одной задачей.</td></tr>
+          <tr><td><code>todoChanges</code></td><td>Общие для обоих списков локальные добавления, изменения и удаления.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="api">
+      <h2>4. API.js: HTTP-запросы</h2>
+      <p>REST API принимает HTTP-запрос и возвращает JSON. <code>todoApi</code> — наш объект с методами для обращения к нему. Таблица отражает запросы именно этой реализации.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Метод кода</th><th>HTTP и адрес относительно https://dummyjson.com</th><th>Действие</th></tr></thead>
+        <tbody>
+          <tr><td><code>getAll()</code></td><td><code>GET /todos?limit=0</code></td><td>Загрузить задачи.</td></tr>
+          <tr><td><code>getAll("asc")</code></td><td><code>GET /todos?limit=0&amp;sortBy=todo&amp;order=asc</code></td><td>Получить задачи по возрастанию названия; <code>desc</code> меняет направление.</td></tr>
+          <tr><td><code>getUsers()</code></td><td><code>GET /users?limit=0</code></td><td>Загрузить исполнителей.</td></tr>
+          <tr><td><code>create(task)</code></td><td><code>POST /todos/add</code></td><td>Передать название, статус и userId.</td></tr>
+          <tr><td><code>update(id, changes)</code></td><td><code>PATCH /todos/{id}</code></td><td>Изменить поля исходной задачи.</td></tr>
+          <tr><td><code>remove(id)</code></td><td><code>DELETE /todos/{id}</code></td><td>Запросить удаление исходной задачи.</td></tr>
+        </tbody>
+      </table></div>
+      <p><code>limit=0</code> запрашивает весь набор; <code>sortBy=todo</code> задаёт поле сортировки. Эти параметры и методы описаны в <a href="https://dummyjson.com/docs/todos">документации Todos</a>; получение пользователей — в <a href="https://dummyjson.com/docs/users">документации Users</a>.</p>
+      <h3>Общий помощник requestTodo</h3>
+      <pre><code>async function requestTodo(url, options) {
+  const response = await fetch(url, {
+    ...options,
+    signal: AbortSignal.timeout(15000)
+  });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return response.json();
+}</code></pre>
+      <p><code>fetch()</code> начинает запрос, <code>await</code> ожидает результат, не блокируя весь интерфейс. Тайм-аут ограничивает ожидание. HTTP-ошибка сама по себе не обязана отклонить Promise fetch, поэтому отдельно проверяется <code>response.ok</code>. <code>response.json()</code> преобразует тело ответа в JavaScript-объект и тоже возвращает Promise.</p>
+      <pre><code>body: JSON.stringify(task),
+headers: { "Content-Type": "application/json" }</code></pre>
+      <p>У POST/PATCH <code>body</code> содержит строку JSON, а заголовок объясняет серверу её формат. GET передаёт параметры в адресе через <code>URLSearchParams</code>. Обёртка <code>(() =&gt; { ... })()</code> изолирует внутренние переменные API.js, а <code>window.todoApi</code> делает нужные методы доступными следующему скрипту. <code>Object.freeze()</code> запрещает заменять свойства этого объекта.</p>
+    </section>
+
+    <section id="render">
+      <h2>5. Как появляется строка задачи</h2>
+      <ol>
+        <li><code>renderTodos()</code> получает актуальные задачи, применяет поиск и статус главного списка.</li>
+        <li><code>renderList()</code> копирует <code>todo-item-template</code> через <code>cloneNode(true)</code>.</li>
+        <li>Заполняет название, статус, ник и картинку; записывает ключ в <code>item.dataset.key</code>.</li>
+        <li>Собирает строки в <code>DocumentFragment</code> и заменяет содержимое списка через <code>replaceChildren()</code>.</li>
+      </ol>
+      <pre><code>&lt;div class="todo-content"&gt;
+  &lt;span class="todo-text"&gt;&lt;/span&gt;
+  &lt;button class="todo-user" type="button" data-action="profile"&gt;
+    &lt;img class="user-avatar" alt=""&gt;
+    &lt;span class="user-handle"&gt;&lt;/span&gt;
+  &lt;/button&gt;
+  &lt;span class="task-state"&gt;&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+      <p>Название и кнопка пользователя — отдельные элементы внутри <code>.todo-content</code> с <code>display: grid</code>. Каждый занимает свою строку. Поэтому длинное название переносится, а ник остаётся под ним. <code>min-width: 0</code> разрешает сжимать колонку, <code>overflow-wrap: anywhere</code> переносит даже очень длинное слово.</p>
+      <p>Название присваивается через <code>textContent</code>: введённый текст <code>&lt;img ...&gt;</code> остаётся текстом и не превращается в HTML. Класс <code>completed</code> добавляет зачёркивание и зелёный статус. <code>setAvatar()</code> скрывает изображение, если адрес отсутствует или загрузка картинки завершилась ошибкой.</p>
+      <p>В профиле применяется тот же шаблон и <code>renderList(..., false)</code>: кнопка ника скрыта, потому что пользователь уже находится в собственной карточке. Изменение, удаление и галочка остаются.</p>
+    </section>
+
+    <section id="filters">
+      <h2>6. Поиск, фильтрация и сортировка</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Действие</th><th>Новый запрос?</th><th>Где применяется условие</th></tr></thead>
+        <tbody>
+          <tr><td>Поиск по названию в главном списке</td><td>Нет</td><td>В браузере: <code>trim()</code>, нижний регистр, <code>includes()</code>.</td></tr>
+          <tr><td>Кнопки статуса главного списка</td><td>Нет</td><td>В браузере по <code>completed</code>.</td></tr>
+          <tr><td>Сортировка главного списка</td><td>Да</td><td>Параметры <code>sortBy</code> и <code>order</code> отправляются в API.</td></tr>
+          <tr><td>Открытие профиля</td><td>Да</td><td>После GET выбираются задачи с нужным <code>userId</code>.</td></tr>
+          <tr><td>Статус в профиле</td><td>Да, даже если направление сортировки не изменилось</td><td>После ответа и объединения изменений применяется <code>completed</code>.</td></tr>
+          <tr><td>Сортировка в профиле</td><td>Да</td><td>Сортирует API; затем выбираются исполнитель и статус.</td></tr>
+        </tbody>
+      </table></div>
+      <p class="note">В документации Todos нет отдельного фильтра по completed. Поэтому профиль делает настоящий GET, но не отправляет выдуманный параметр фильтрации. <code>todoApi.getAll(order)</code> получает отсортированные задачи, а <code>getProfileTodos()</code> и <code>renderProfileTasks()</code> оставляют нужного исполнителя и статус. Это ограничение выбранного API, а не отсутствие запроса. <a href="https://dummyjson.com/docs/todos">Описание возможностей Todos</a>.</p>
+      <h3>Путь действия в профиле</h3>
+      <pre><code>change у profile-filter или profile-sort
+  → fetchProfileTodos()
+  → todoApi.getAll(order)
+  → GET /todos?limit=0&amp;sortBy=todo&amp;order=asc
+  → profileServerTodos = result
+  → mergeTodoChanges(profileServerTodos, profileSort)
+  → отбор по userId
+  → отбор по completed
+  → renderList(profile-todos, visible, false)</code></pre>
+      <p>Отдельные переменные профиля позволяют менять его порядок, не переставляя главный список. Счётчик показывает число видимых задач и общее количество у исполнителя; числа выполненных и невыполненных относятся ко всем его задачам, до фильтра.</p>
+      <h3>Почему запоздавший ответ не ломает список</h3>
+      <pre><code>const request = ++profileRequest;
+const userId = profileUserId;
+const result = await todoApi.getAll(order);
+if (request !== profileRequest ||
+    userId !== profileUserId || !profileDialog.open) return;</code></pre>
+      <p>Если быстро выбрать А–Я, затем Я–А, первый ответ может прийти последним. Сравнение номера оставляет только актуальный результат. Проверка пользователя и открытого диалога защищает при закрытии или переходе в другой профиль. Сам сетевой запрос при этом не обязательно прерывается — его устаревший результат игнорируется.</p>
+      <p>При ошибке старый список остаётся, select возвращаются к последним применённым значениям, появляется кнопка повторной загрузки. Пока идёт запрос, сообщение и <code>aria-busy</code> показывают ожидание. Повторная загрузка использует текущие, восстановленные настройки.</p>
+    </section>
+
+    <section id="crud">
+      <h2>7. CRUD: что происходит при каждом действии</h2>
+      <p>CRUD — Create, Read, Update, Delete: создать, прочитать, изменить, удалить.</p>
+      <h3>Добавление</h3>
+      <ol>
+        <li>Кнопка «Добавить» вызывает <code>openTodoForm()</code>. В профиле в неё передаётся текущий исполнитель.</li>
+        <li>Форма сбрасывается; <code>editingTodoKey = null</code>; вызывается <code>showModal()</code>.</li>
+        <li>Событие <code>submit</code> вызывает <code>preventDefault()</code>, чтобы браузер не перезагрузил страницу.</li>
+        <li>Название очищается через <code>trim()</code>, ID превращается в число, статус читается из checkbox.checked.</li>
+        <li>Если название состоит из пробелов, <code>setCustomValidity()</code> и <code>reportValidity()</code> показывают ошибку. Также проверяется существование исполнителя в Map.</li>
+        <li>Кнопки блокируются, отправляется POST. После успеха задача получает уникальный <code>localKey</code>, попадает в <code>todoChanges.created</code>, сохраняется и показывается в списках, если подходит под выбранные фильтры.</li>
+      </ol>
+      <h3>Редактирование</h3>
+      <p><code>openTodoForm(todo)</code> запоминает ключ и заполняет ту же форму прежними значениями. После submit вызывается <code>mutateTodo(todo, task)</code>. Можно изменить название, исполнителя и статус. При смене исполнителя задача исчезает из старого профиля, потому что её новый userId больше не совпадает с profileUserId.</p>
+      <h3>Галочка</h3>
+      <pre><code>mutateTodo(todo, { completed: event.target.checked });</code></pre>
+      <p>Для исходной задачи отправляется PATCH. После подтверждения обновляются надпись, зачёркивание и оба списка. Если выбран фильтр «Не выполнено», завершённая задача исчезает из результатов. При ошибке данные не меняются: повторная отрисовка возвращает прежнее положение галочки.</p>
+      <h3>Удаление</h3>
+      <p><code>mutateTodo(todo, null)</code> означает удаление. У исходной задачи отправляется DELETE и сохраняется её ID в <code>deleted</code>. Локальная задача удаляется из массива <code>created</code>. После успешной операции список перерисовывается, включая открытую карточку пользователя.</p>
+      <h3>Отмена и ошибки</h3>
+      <p>Кнопка «Отмена» справа закрывает диалог, не сохраняя введённые поля. Подтверждение с галочкой находится слева. Во время сохранения элементы формы заблокированы; Escape не закрывает окно, пока операция не завершится. Если сохранение не удалось, диалог остаётся открытым с введённым текстом и сообщением об ошибке; <code>finally</code> возвращает доступность кнопок.</p>
+    </section>
+
+    <section id="storage">
+      <h2>8. Почему нужен localStorage</h2>
+      <p>DummyJSON подтверждает POST/PATCH/DELETE, но не сохраняет эти операции на сервере. Поэтому приложение хранит изменения в браузере. Это описано в разделах добавления, изменения и удаления в <a href="https://dummyjson.com/docs/todos">документации API</a>.</p>
+      <pre><code>todoChanges = {
+  created: [], // новые задачи с localKey
+  updated: {}, // изменения исходных задач по ID
+  deleted: []  // ID скрытых исходных задач
+};</code></pre>
+      <p><code>mergeTodoChanges(source, order)</code> работает по следующему правилу:</p>
+      <pre><code>актуальные задачи =
+  новые локальные задачи
+  + задачи ответа API без deleted
+  + поверх каждой исходной задачи поля из updated[id]</code></pre>
+      <p>Например, <code>{ ...todo, ...todoChanges.updated[todo.id] }</code> сначала копирует серверную задачу, затем заменяет изменённые поля. ID удалённых задач превращаются в Set, чтобы проверять их через <code>has()</code>. Оба списка используют одну функцию объединения, поэтому новый GET не отменяет редактирование и не возвращает удалённую задачу.</p>
+      <p>Сервер ничего не знает о новых локальных названиях. Если выбрана сортировка и есть такие названия, после ответа выполняется дополнительный <code>localeCompare()</code>: локальные задачи встраиваются в общий алфавитный порядок. Сам запрос сортировки всё равно отправляется.</p>
+      <p>Ключ хранилища — <code>front_back_project.todos.v1</code>. <code>JSON.stringify()</code> превращает данные в строку при записи, <code>JSON.parse()</code> восстанавливает их при запуске. Старый формат сохранений остаётся совместимым.</p>
+      <p>Новые задачи имеют отдельный <code>localKey</code>, потому что демонстрационный API может возвращать один и тот же ID при нескольких добавлениях. Редактировать и удалять такие задачи на сервере нельзя надёжно: их там нет. Эти операции выполняются локально; PATCH/DELETE отправляются для исходных задач.</p>
+      <p>Если хранилище недоступно, приложение продолжает работать в текущем открытии и сообщает, что сохранить изменение для следующего запуска не удалось. Данные не синхронизируются между браузерами и компьютерами. Для <code>file:</code> поведение хранения зависит от браузера; для предсказуемого хранения можно использовать статический просмотр через HTTP.</p>
+    </section>
+
+    <section id="functions">
+      <h2>9. Карта функций script.js</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Функция</th><th>Задача</th></tr></thead>
+        <tbody>
+          <tr><td><code>byId(id)</code></td><td>Сокращение для document.getElementById.</td></tr>
+          <tr><td><code>readTodoChanges()</code></td><td>Читает сохранения; при отсутствии/ошибке возвращает пустую структуру.</td></tr>
+          <tr><td><code>saveTodoChanges(message)</code></td><td>Сохраняет изменения и выводит результат либо предупреждение о хранилище.</td></tr>
+          <tr><td><code>setTodoStatus(message, isError)</code></td><td>Обновляет сообщения главного списка и профиля, переключает класс error.</td></tr>
+          <tr><td><code>todoKey(todo)</code></td><td>Возвращает localKey либо строку server-ID.</td></tr>
+          <tr><td><code>mergeTodoChanges(source, order)</code></td><td>Объединяет ответ API с созданными, изменёнными и удалёнными задачами.</td></tr>
+          <tr><td><code>getTodos()</code></td><td>Получает актуальные данные главного списка.</td></tr>
+          <tr><td><code>getProfileTodos()</code></td><td>Объединяет данные профиля и отбирает текущего исполнителя.</td></tr>
+          <tr><td><code>setAvatar(image, user)</code></td><td>Задаёт изображение и обработку ошибки картинки.</td></tr>
+          <tr><td><code>renderList(list, tasks, showUser)</code></td><td>Создаёт строки из template или сообщение о пустом результате.</td></tr>
+          <tr><td><code>renderTodos()</code></td><td>Применяет главный поиск/фильтр, рисует список и обновляет открытый профиль.</td></tr>
+          <tr><td><code>renderProfileTasks()</code></td><td>Применяет статус профиля, обновляет счётчики и его список.</td></tr>
+          <tr><td><code>fetchProfileTodos()</code></td><td>Запрос профиля, защита от старых ответов, сохранение настроек, ошибка/повтор.</td></tr>
+          <tr><td><code>openProfile(userId)</code></td><td>Заполняет сведения, сбрасывает фильтры профиля, открывает dialog и загружает задачи.</td></tr>
+          <tr><td><code>updateCompletionLabel()</code></td><td>Меняет подпись статуса внутри формы.</td></tr>
+          <tr><td><code>openTodoForm(todo, userId)</code></td><td>Настраивает форму для создания или редактирования.</td></tr>
+          <tr><td><code>fetchTodos()</code></td><td>Загружает/сортирует главный список; сохраняет предыдущий при ошибке.</td></tr>
+          <tr><td><code>loadData()</code></td><td>Запускает загрузку задач и пользователей, заполняет select исполнителей.</td></tr>
+          <tr><td><code>mutateTodo(todo, changes)</code></td><td>Обновляет задачу или удаляет её, защищает от повторного действия, сохраняет результат.</td></tr>
+        </tbody>
+      </table></div>
+      <p>Старт приложения — вызов <code>loadData()</code> в конце файла. Обработчик submit не вынесен в именованную функцию: это асинхронная функция, переданная непосредственно в <code>todoForm.addEventListener()</code>.</p>
+    </section>
+
+    <section id="syntax">
+      <h2>10. JavaScript: конструкции и события</h2>
+      <ul>
+        <li><code>const</code> запрещает переприсваивание переменной, но не делает содержимое объекта неизменяемым. <code>let</code> используется для состояния, которому присваиваются новые значения.</li>
+        <li><code>async / await</code> помогают последовательно описать асинхронную операцию. <code>try / catch / finally</code> разделяют успех, ошибку и обязательное завершение.</li>
+        <li><code>Promise.allSettled()</code> ждёт задачи и пользователей; каждый результат содержит <code>status</code> и <code>value</code> либо <code>reason</code>. Ошибка загрузки пользователей не уничтожает успешно загруженные задачи.</li>
+        <li><code>map()</code> преобразует элементы, <code>filter()</code> отбирает, <code>find()</code> находит один объект, <code>some()</code> проверяет наличие подходящего элемента, <code>forEach()</code> выполняет действие для каждого.</li>
+        <li><code>sort()</code> меняет порядок массива. Поэтому перед сортировкой запасного списка профиля создаётся копия <code>[...serverTodos]</code>.</li>
+        <li><code>?.</code> безопасно обращается к необязательному полю, например <code>user.company?.name</code>. <code>??</code> подставляет запасное значение только для null/undefined.</li>
+        <li><code>условие ? значение1 : значение2</code> — условное выражение. Оно выбирает, например, подпись «Выполнено» или «Не выполнено».</li>
+        <li><code>...object</code> копирует свойства, <code>...array</code> раскрывает элементы. В <code>Object.assign()</code> новые свойства записываются в существующий объект.</li>
+        <li>Шаблонные строки в обратных кавычках вставляют переменные через <code>${...}</code>: адрес задачи, сообщения и счётчики.</li>
+      </ul>
+      <h3>Делегирование событий</h3>
+      <pre><code>const button = event.target.closest("button[data-action]");
+const row = event.target.closest(".todo-item");
+const key = row?.dataset.key;</code></pre>
+      <p>Обработчик установлен на список, а не на каждую кнопку. Событие всплывает от нажатого элемента. <code>closest()</code> находит кнопку и строку даже при клике по картинке или тексту внутри кнопки. После <code>replaceChildren()</code> строки новые, но обработчик списка остаётся.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Событие</th><th>Где применяется</th></tr></thead>
+        <tbody>
+          <tr><td><code>click</code></td><td>Кнопки CRUD, открытие/закрытие окон, фильтры главного списка и тема.</td></tr>
+          <tr><td><code>input</code></td><td>Поиск при вводе; сброс сообщения валидации после исправления названия.</td></tr>
+          <tr><td><code>change</code></td><td>Галочки и select: сортировка, статус профиля, подпись статуса формы.</td></tr>
+          <tr><td><code>submit</code></td><td>Подтверждение формы кнопкой или стандартным поведением Enter.</td></tr>
+          <tr><td><code>cancel</code></td><td>Попытка закрыть dialog через Escape; блокируется во время сохранения формы.</td></tr>
+          <tr><td><code>close</code></td><td>Сброс режима редактирования, возврат фокуса; у профиля также инвалидируется номер запроса.</td></tr>
+          <tr><td><code>DOMContentLoaded</code></td><td>Подключение кнопки темы, когда HTML готов.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="css">
+      <h2>11. CSS и тема</h2>
+      <ul>
+        <li><code>:root</code> задаёт переменные цветов, например <code>--surface</code>. Правило <code>:root[data-theme="light"]</code> заменяет их для светлой темы.</li>
+        <li><code>display: flex</code> располагает галочку, содержимое и кнопки строки; <code>gap</code> задаёт промежуток.</li>
+        <li><code>display: grid</code> строит колонки поиска, две части профиля и отдельные строки содержимого задачи.</li>
+        <li><code>minmax(0, 1fr)</code> создаёт гибкие колонки профиля; нулевой минимум помогает длинному тексту не растянуть окно.</li>
+        <li><code>.modal::backdrop</code> затемняет фон. <code>max-height</code> и <code>overflow: auto</code> разрешают прокрутку большого профиля.</li>
+        <li><code>body:has(dialog[open])</code> запрещает прокрутку страницы позади открытого окна.</li>
+        <li><code>.modal-actions</code> с <code>justify-content: space-between</code> разводит подтверждение и отмену по краям.</li>
+        <li><code>@media (max-width: 640px)</code> перестраивает две колонки в одну и уменьшает отступы.</li>
+        <li><code>:hover</code> показывает реакцию на наведение; <code>:focus-visible</code> выделяет элемент при управлении клавиатурой.</li>
+      </ul>
+      <p><code>theme.js</code> читает ключ <code>front_back_project.todos.theme</code> и записывает тему в <code>document.documentElement.dataset.theme</code>. CSS реагирует на этот атрибут. По нажатию меняется тема и её сохранённое значение. Это отдельное сохранение: переключение цветов не влияет на задачи.</p>
+    </section>
+
+    <section id="checks">
+      <h2>12. Как проверить и объяснить работу</h2>
+      <h3>Сетевые запросы в браузере</h3>
+      <ol>
+        <li>Открой страницу задач и инструменты разработчика, вкладку Network → Fetch/XHR.</li>
+        <li>Нажми ник: появится GET списка задач для профиля.</li>
+        <li>Выбери в профиле «Выполнено»: появится новый GET. В адресе может не быть нового параметра статуса — он применяется в коде после ответа.</li>
+        <li>Выбери Я–А: в запросе будут <code>sortBy=todo</code> и <code>order=desc</code>.</li>
+        <li>Измени исходную задачу: проверь PATCH и JSON в Request Payload. Удали исходную задачу: проверь DELETE.</li>
+        <li>Добавь задачу: проверь POST с <code>todo</code>, <code>completed</code> и <code>userId</code>. Её последующие изменения локальны.</li>
+        <li>Обнови страницу: сохранённые изменения должны снова наложиться на исходный ответ.</li>
+      </ol>
+      <h3>Автотесты</h3>
+      <p>Из корня проекта в терминале Windows:</p>
+      <pre><code>npm.cmd install --no-save --package-lock=false jsdom
+node todo/tests.cjs</code></pre>
+      <p>Тесты проверяют CRUD, выбор исполнителя, профиль, поиск, отдельные сортировки, запрос при фильтрации профиля, счётчики, ошибки и повтор, запоздавшие ответы, переключение профиля и сохранения. Запросы в этих тестах подменены предсказуемыми ответами: это проверка логики, а не доступности внешнего сервиса. jsdom не проверяет реальное расположение пикселей, загрузку аватаров и поведение модальных окон конкретного браузера; диалоги в тесте имитируются.</p>
+      <h3>Частые вопросы</h3>
+      <dl class="profile-details">
+        <dt>Зачем два ID?</dt><dd><code>todo.id</code> определяет задачу; <code>todo.userId</code> определяет исполнителя.</dd>
+        <dt>Почему ник снизу?</dt><dd>Название и кнопка ника — отдельные строки grid-контейнера.</dd>
+        <dt>Где находится backend?</dt><dd>Собственного backend нет. Удалённым источником данных служит DummyJSON.</dd>
+        <dt>Фильтр и сортировка?</dt><dd>Фильтр убирает неподходящие элементы; сортировка меняет порядок оставшихся.</dd>
+        <dt>Почему GET повторяется?</dt><dd>Каждое переключение профиля перечитывает данные по требованию интерфейса, даже если статус затем отбирается в браузере.</dd>
+        <dt>Зачем localKey?</dt><dd>Новые демонстрационные задачи могут иметь повторяющийся серверный ID; локальный ключ различает их в интерфейсе.</dd>
+        <dt>Почему PATCH не меняет API навсегда?</dt><dd>DummyJSON имитирует запись. Приложение хранит подтверждённые изменения отдельно в localStorage.</dd>
+        <dt>Что при ошибке?</dt><dd>Показывается сообщение, старые данные остаются, кнопки снова доступны, загрузку можно повторить.</dd>
+      </dl>
+      <p class="note">Для объяснения на защите: «HTML задаёт элементы, CSS отвечает за их расположение, API.js отправляет запросы, script.js связывает действия с данными. Задачи связаны с пользователями через userId. Два списка имеют свои фильтры, но используют общие локальные изменения и одинаковые CRUD-обработчики».</p>
+      <p><a href="index.html">← Вернуться к приложению</a></p>
+    </section>
+  </main>
+</body>
+</html>
